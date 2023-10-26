@@ -1,17 +1,20 @@
+:-module(option, [option/6]).
+
 %Dominios
 %Code = integer
 %Message = string
 %ChatbotCodeLink = integer
 %InitialFlowLink = integer
 %Keywords = list
+%Option = list (TDA option)
 
 %Predicados:
-% option/4(code, message, chatbotCodeLink, initialFlowLink,keywords)
-% stringlist/1(list)
+% option/6(Code,Message,ChatbotCodeLink,InitialFlowLink,Keywords,Option)
+% stringlist/1(Keywords)
 
 %Metas
 %Primarias
-%option(Code,Mens,Cblink,Flink,Keys)
+%option(Code,Mens,Cblink,Flink,Keys,Option)
 %Secundarias
 %stringlist(L)
 
@@ -20,14 +23,18 @@
 
 
 %Reglas
-option(Code, Mens, Cblink, Flink, Keys):-
+option(Code, Mens, Cblink, Flink, Keys, Option):-
     integer(Code), Code >= 0,
     string(Mens),
     integer(Cblink), Cblink >= 0,
     integer(Flink), Flink >= 0,
-    stringlist(Keys).
+    stringlist(Keys),
+    Option = [Code, Mens, Cblink, Flink, Keys].
 
 stringlist([]):-!.
 stringlist([A|B]):-
     string(A),
     stringlist(B).
+
+
+
