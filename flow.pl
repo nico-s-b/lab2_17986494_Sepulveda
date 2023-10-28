@@ -5,18 +5,22 @@
 %Id = integer
 %Message = string
 %Oplist = list
+%RevOplist = list
+%Code = integer
 %Flow = list (TDA flow)
 
 %Predicados:
-% flow/4(Id, Name-msg, Oplist, Flow)
-% stringlist/1(Keywords)
+% flow(Id, Name-msg, Oplist, Flow)
+% oplistVerifier(Oplist, RevOplist)
+% opIsNotDuplicated(Code,Oplist)
 
 %Metas
 %Primarias
 %flow/4
 
 %Secundarias
-%verificarOp/2
+%oplistVerifier/2
+%opIsNotDuplicated/2
 
 %Clausulas de Horn
 %Base de conocimiento
@@ -27,7 +31,7 @@ flow(Id, Name, Oplist, Flow):-
     integer(Id), Id >= 0,
     string(Name),
     oplistVerifier(Oplist,RevOplist),
-    Flow = [Id, Name, Oplist].
+    Flow = [Id, Name, RevOplist].
 
 oplistVerifier([],[]).
 oplistVerifier([Op|Res],[Opt|Rest]):-
@@ -35,10 +39,11 @@ oplistVerifier([Op|Res],[Opt|Rest]):-
     option(R1,R2,R3,R4,R5,Opt),
     opIsNotDuplicated(R1,Res),
     oplistVerifier(Res,Rest).
-oplistVerifier([Op|Res],Rest).
 
 opIsNotDuplicated(_,[]).
 opIsNotDuplicated(R1,[HOp|Oplist]):-
     optionGetElements(HOp,R_1,_,_,_,_),
     R1 \= R_1,
     opIsNotDuplicated(R1,Oplist).
+
+
