@@ -1,4 +1,5 @@
-:-module(flow, [flow/4]).
+:-module(flow, [flow/4,
+               flowAddOption/3]).
 :-use_module(option).
 
 %Dominios
@@ -17,10 +18,12 @@
 %Metas
 %Primarias
 %flow/4
+%flowAddOption/3
 
 %Secundarias
 %oplistVerifier/2
 %opIsNotDuplicated/2
+%flowGetElements/4
 
 %Clausulas de Horn
 %Base de conocimiento
@@ -32,6 +35,11 @@ flow(Id, Name, Oplist, Flow):-
     string(Name),
     oplistVerifier(Oplist,RevOplist),
     Flow = [Id, Name, RevOplist].
+
+flowGetElements(Flow, E1, E2, E3):-
+    nth0(0, Flow, E1),
+    nth0(1, Flow, E2),
+    nth0(2, Flow, E3).
 
 oplistVerifier([],[]).
 oplistVerifier([Op|Res],[Opt|Rest]):-
@@ -46,4 +54,11 @@ opIsNotDuplicated(R1,[HOp|Oplist]):-
     R1 \= R_1,
     opIsNotDuplicated(R1,Oplist).
 
+flowAddOption(FlowIni, Op, FlowFin):-
+    flowGetElements(FlowIni, E1, E2, E3),
+    Oplist = [Op|E3],
+    oplistVerifier(Oplist, RevOplist),
+    flow(E1, E2, RevOplist, FlowFin).
 
+flowAddOption(FlowIni, _, FlowFin):-
+    FlowFin = FlowIni.
