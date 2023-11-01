@@ -6,14 +6,17 @@
 %Id = integer
 %Message = string
 %Oplist = list
-%RevOplist = list
 %Code = integer
 %Flow = list (TDA flow)
+%Code = int (TDA option)
+%Option = list (TDA option)
 
 %Predicados:
 % flow(Id, Name-msg, Oplist, Flow)
-% oplistVerifier(Oplist, RevOplist)
+% flowAddOption(Flow, Option, Flow)
+% oplistVerifier(Oplist, Oplist)
 % opIsNotDuplicated(Code,Oplist)
+% flowGetElements(Flow, Id, Name-msg, Oplist)
 
 %Metas
 %Primarias
@@ -43,20 +46,20 @@ flowGetElements(Flow, E1, E2, E3):-
 
 oplistVerifier([],[]).
 oplistVerifier([Op|Res],[Opt|Rest]):-
-    optionGetElements(Op,R1,R2,R3,R4,R5),
-    option(R1,R2,R3,R4,R5,Opt),
-    opIsNotDuplicated(R1,Res),
+    optionGetElements(Op,Code,R2,R3,R4,R5),
+    option(Code,R2,R3,R4,R5,Opt),
+    opIsNotDuplicated(Code,Res),
     oplistVerifier(Res,Rest).
 
 opIsNotDuplicated(_,[]).
-opIsNotDuplicated(R1,[HOp|Oplist]):-
-    optionGetElements(HOp,R_1,_,_,_,_),
-    R1 \= R_1,
-    opIsNotDuplicated(R1,Oplist).
+opIsNotDuplicated(Code,[HOp|Oplist]):-
+    optionGetElements(HOp,Code2,_,_,_,_),
+    Code\= Code2,
+    opIsNotDuplicated(Code,Oplist).
 
 flowAddOption(FlowIni, Op, FlowFin):-
-    flowGetElements(FlowIni, E1, E2, E3),
-    Oplist = [Op|E3],
+    flowGetElements(FlowIni, E1, E2, Ops),
+    append(Ops,[Op], Oplist),
     oplistVerifier(Oplist, RevOplist),
     flow(E1, E2, RevOplist, FlowFin).
 
