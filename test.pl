@@ -13,7 +13,6 @@ t_flowAddOption(F1, O1, F5),
 t_flowAddOption(F5, O2, F6),
 F2 = F3.
 
-%OJOOOOOOOO se están agregando al inicio, las listas de opciones resultantes no son exactamente iguales... tienen los mismos elementos pero en otro orden! manejar... o agregar opciones al final SIEMPRE
 %t_flowAddOption(F14, O2, F15).
 
 

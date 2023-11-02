@@ -1,5 +1,5 @@
 :-module(option, [option/6,
-                 optionGetElements/6]).
+                 oplistVerifier/2]).
 
 %Dominios
 %Code = integer
@@ -8,10 +8,13 @@
 %InitialFlowLink = integer
 %Keywords = list
 %Option = list (TDA option)
+%Oplist = list
 
 %Predicados:
 % option(Code,Message,ChatbotCodeLink,InitialFlowLink,Keywords,Option)
 % optionGetElements(Option,Code,Message,ChatbotCodeLink,InitialFlowLink,Kewwords)
+% oplistVerifier(Oplist, Oplist)
+% opIsNotDuplicated(Code,Oplist)
 % stringlist(Keywords)
 
 %Metas
@@ -20,6 +23,8 @@
 %
 %Secundarias
 %optionGetElements/6
+%oplistVerifier/2
+%optionIsNotDuplicated/2
 %stringlist/1
 
 %Clausulas de Horn
@@ -47,5 +52,16 @@ stringlist([A|B]):-
     string(A),
     stringlist(B).
 
+oplistVerifier([],[]).
+oplistVerifier([Op|Res],[Opt|Rest]):-
+    optionGetElements(Op,Code,R2,R3,R4,R5),
+    option(Code,R2,R3,R4,R5,Opt),
+    opIsNotDuplicated(Code,Res),
+    oplistVerifier(Res,Rest).
 
+opIsNotDuplicated(_,[]).
+opIsNotDuplicated(Code,[HOp|Oplist]):-
+    optionGetElements(HOp,Code2,_,_,_,_),
+    Code\= Code2,
+    opIsNotDuplicated(Code,Oplist).
 

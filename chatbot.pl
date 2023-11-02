@@ -1,5 +1,6 @@
 :-module(chatbot, [chatbot/6,
-               chatbotAddFlow/3]).
+                  chatbotAddFlow/3,
+                  chatbotsVerifier/2]).
 :-use_module(flow).
 
 %Dominios
@@ -51,19 +52,6 @@ chatbotGetElements(Chatbot, E1, E2, E3, E4, E5):-
     nth0(3, Chatbot, E4),
     nth0(4, Chatbot, E5).
 
-flowVerifier([],[]).
-flowsVerifier([F|Res],[Flow|Rest]):-
-    flowGetElements(F, Id, E2, E3),
-    flow(Id,E2,E3,Flow),
-    flowIsNotDuplicated(Id,Res),
-    flowsVerifier(Res,Rest).
-
-flowIsNotDuplicated(_,[]).
-flowIsNotDuplicated(Id,[Flow|Flowlist]):-
-    flowGetElements(Flow,E1,_,_),
-    Id \= E1,
-    flowIsNotDuplicated(Id,Flowlist).
-
 chatbotAddFlow(CbotIni,Flow,CbotFin):-
     chatbotGetElements(CbotIni, E1, E2, E3, E4, Flows),
     addFlow(Flow,Flows,ResFlows),
@@ -73,3 +61,16 @@ chatbotAddFlow(CbotIni,Flow,CbotFin):-
 addFlow(Flow,[],[Flow]).
 addFlow(Flow,[H|T],[H|ResFlows]):-
     addFlow(Flow,T,ResFlows).
+
+chatbotsVerifier([],[]).
+chatbotsVerifier([Cbot|Res],[Cbot2|Rest]):-
+    chatbotGetElements(Cbot,Id,E2,E3,E4,E5),
+    chatbot(Id,E2,E3,E4,E5,Cbot2),
+    chatbotIsNotDuplicated(Id,Res),
+    chatbotsVerifier(Res,Rest).
+
+chatbotIsNotDuplicated(_,[]).
+chatbotIsNotDuplicated(Id,[Cbot|Res]):-
+    chatbotGetElements(Cbot,Id2,_,_,_,_),
+    Id \= Id2,
+    chatbotIsNotDuplicated(Id,Res).
