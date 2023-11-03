@@ -100,7 +100,7 @@ systemAddUser(SystemIni,User,SystemFin):-
     systemGetElements(SystemIni,E1,E2,E3,UserlistIni),
     user(User,UserF),
     append(UserlistIni,UserF,Userlist),
-    usersVerifier(Userlist,UserlistFin),
-    system(E1,E2,E3,UserlistFin,SystemFin).
+    \+ userInList(User,Userlist),
+    system(E1,E2,E3,Userlist,SystemFin).
 
 systemTalkRec().

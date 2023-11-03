@@ -2,7 +2,10 @@
                usersVerifier/2,
                userInList/2]).
 :-use_module(chathistory).
-%Dominio
+%Dominios
+%Username = string
+%User = list (TDA user)
+%Userlist = list
 
 user(Username, UserF):-
     string(Username),
@@ -11,6 +14,8 @@ user(Username, UserF):-
 
 usersVerifier([],[]).
 userVerifier(User,[[U|Chat]|Userlist]):-
-    User \= U.
+    not(userInList(User,Userlist)).
 
-userInList(User,Userlist).
+userInList(User,[[User,_]|_]).
+userInList(User,[_|List]):-
+    userInList(User,List).

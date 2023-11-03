@@ -1,9 +1,11 @@
 :-module(chathistory, [chathistory/2]).
 
-%Dominio
+%Dominios
+%ChatHistory = list
 
-chathistory(Chat,Chat):-
-    stringlist(Chat).
+chathistory(ChatH,ChatH):-
+    stringlist(ChatH).
+
 
 
 stringlist([]):-!.
