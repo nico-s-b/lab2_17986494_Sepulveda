@@ -102,3 +102,5 @@ systemAddUser(SystemIni,User,SystemFin):-
     append(UserlistIni,UserF,Userlist),
     usersVerifier(Userlist,UserlistFin),
     system(E1,E2,E3,UserlistFin,SystemFin).
+
+systemTalkRec().
