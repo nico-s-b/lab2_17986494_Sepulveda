@@ -1,7 +1,7 @@
 :-module(flow, [flow/4,
                flowAddOption/3,
                flowsVerifier/2]).
-:-use_module(option).
+:-use_module(option_17986494_SepulvedaBallesteros).
 
 %Dominios
 %Id = integer

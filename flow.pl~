@@ -1,38 +1,63 @@
-:-module(flow, [flow/4]).
+:-module(flow, [flow/4,
+               flowAddOption/3,
+               flowsVerifier/2]).
 :-use_module(option).
 
 %Dominios
 %Id = integer
 %Message = string
-%Oplist = list
+%Code = integer
 %Flow = list (TDA flow)
+%Option = list (TDA option)
 
 %Predicados:
-% flow/4(Id, Name-msg, Oplist, Flow)
-% stringlist/1(Keywords)
+% flow(Id, Name-msg, Oplist, Flow)
+% flowAddOption(Flow, Option, Flow)
+% flowGetElements(Flow, Id, Name-msg, Oplist)
+% flowVerifier(Flowlist,Flowlist)
+% flowIsNotDuplicated(Id,Flowlist)
 
 %Metas
 %Primarias
 %flow/4
+%flowAddOption/3
 
 %Secundarias
-%verificarOp/2
+%flowsVerifier/2
+%flowIsNotDuplicated/2
+%flowGetElements/4
 
 %Clausulas de Horn
 %Base de conocimiento
-
 
 %Reglas
 flow(Id, Name, Oplist, Flow):-
     integer(Id), Id >= 0,
     string(Name),
-    OplistVerifier(Oplist,RevOplist),
-    Flow = [Id, Name, Oplist].
+    oplistVerifier(Oplist,RevOplist),
+    Flow = [Id, Name, RevOplist].
 
-OplistVerifier([],[]).
-OplistVerifier([Op|Res],[Opt|Rest]):-
-    optionGetElements(Op,R1,R2,R3,R4,R5),
-    option(R1,R2,R3,R4,R5,Opt),
-    OpIsNotDuplicated(),
-    verificarOp(Res,Rest).
-OplistVerifier([Op|Res],Rest).
+flowGetElements(Flow, E1, E2, E3):-
+    nth0(0, Flow, E1),
+    nth0(1, Flow, E2),
+    nth0(2, Flow, E3).
+
+flowAddOption(FlowIni, Op, FlowFin):-
+    flowGetElements(FlowIni, E1, E2, Ops),
+    append(Ops,[Op], Oplist),
+    oplistVerifier(Oplist, RevOplist),
+    flow(E1, E2, RevOplist, FlowFin).
+flowAddOption(FlowIni, _, FlowIni).
+
+flowsVerifier([],[]).
+flowsVerifier([F|Res],[Flow|Rest]):-
+    flowGetElements(F, Id, E2, E3),
+    flow(Id,E2,E3,Flow),
+    flowIsNotDuplicated(Id,Res),
+    flowsVerifier(Res,Rest).
+
+flowIsNotDuplicated(_,[]).
+flowIsNotDuplicated(Id,[Flow|Flowlist]):-
+    flowGetElements(Flow,E1,_,_),
+    Id \= E1,
+    flowIsNotDuplicated(Id,Flowlist).
