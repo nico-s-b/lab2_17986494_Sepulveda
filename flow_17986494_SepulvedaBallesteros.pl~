@@ -1,9 +1,10 @@
-:-module(flow, [flow/4,
-               flowAddOption/3,
-               flowsVerifier/2,
-               getFlowFromList/3,
-               flowGetElements/4]).
-:-use_module(option).
+:-module(flow_17986494_SepulvedaBallesteros, [flow/4,
+                                              flowAddOption/3,
+                                              flowsVerifier/2,
+                                              getFlowFromList/3,
+                                              flowGetElements/4,
+                                              flowIsNotDuplicated/2]).
+:-use_module(option_17986494_SepulvedaBallesteros).
 
 %Clausulas de Horn
 %Base de conocimiento
@@ -27,32 +28,39 @@ flow(Id, Name, Oplist, Flow):-
 %Dominio:
 %Flow (TDA flow) X Id (int) X Name (string) X Oplist (list of options)
 % Meta primaria: flowGetElements/4
-flowGetElements([E1, E2, E3, _], E1, E2, E3).
+flowGetElements([E1, E2, E3], E1, E2, E3).
 
 %Predicado
 % flowAddOption(Flow, Option, Flow)
 %Dominio: Flow (TDA flow) X Option (TDA option) X Flow (TDA flow)
 % Meta primaria: flowAddOption/3
 % Metas secundarias: flowGetElements/4 , append/3, oplistVerifier/2 , flow/4
-flowAddOption(FlowIni, Op, FlowFin):-
-    flowGetElements(FlowIni, E1, E2, Ops),
-    append(Ops,[Op], Oplist),
-    oplistVerifier(Oplist, RevOplist),
+flowAddOption(FlowIni, Option, FlowFin):-
+    flowGetElements(FlowIni, E1, E2, OplistIni),
+    append(OplistIni,[Option], Oplist),
+    oplistVerifier(Oplist,RevOplist),
     flow(E1, E2, RevOplist, FlowFin).
-flowAddOption(FlowIni, _, FlowIni).
+flowAddOption(Flow, Option, Flow):-
+    flowGetElements(Flow, _, _, Oplist),
+    append(Oplist,[Option], Oplist2),
+    \+ oplistVerifier(Oplist2,_).
 
 %Predicado
-% flowVerifier(Flowlist,Flowlist)
+% flowVerifier(Flowlist)
 %Dominio: Flowlist (list of flows) X Flowlist (list of flows)
 % Meta primaria: flowsVerifier/2
 % Metas secundarias: flowGetElements/4 , flow/4 ,
 % flowIsNotDuplicated/2 , flowsVerifier/2
 flowsVerifier([],[]).
-flowsVerifier([F|Res],[Flow|Rest]):-
-    flowGetElements(F, Id, E2, E3),
-    flow(Id,E2,E3,Flow),
-    flowIsNotDuplicated(Id,Res),
-    flowsVerifier(Res,Rest).
+flowsVerifier([Flow|Resto],[Flow|FlowAcum]):-
+    flowGetElements(Flow, Id, _, _),
+    flowIsNotDuplicated(Id,Resto),
+    flowsVerifier(Resto,FlowAcum).
+flowsVerifier([F|Resto],FlowAcum):-
+    flowGetElements(F, Id, _, _),
+    \+ flowIsNotDuplicated(Id,Resto),
+    flowsVerifier(Resto,FlowAcum).
+
 
 %Predicado
 % flowIsNotDuplicated(Id,Flowlist)

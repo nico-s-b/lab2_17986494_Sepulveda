@@ -1,20 +1,13 @@
-:-module(chathistory_17986494_SepulvedaBallesteros, [chathistory/1]).
+:-module(chathistory_17986494_SepulvedaBallesteros, [chatVerifier/1]).
 
 %Dominios
 %ChatHistory = list
 
-chathistory([]).
-chathistory([Chat|Resto]):-
-    Chat = [Cblink,Flink,Msg],
+chatVerifier([]).
+chatVerifier([[Cblink,Flink,Msg]|Resto]):-
     string(Msg),
     integer(Cblink),
     integer(Flink),
-    chathistory(Resto).
+    chatVerifier(Resto).
 
 
-
-
-stringlist([]):-!.
-stringlist([A|B]):-
-    string(A),
-    stringlist(B).

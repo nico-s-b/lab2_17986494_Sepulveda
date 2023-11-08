@@ -1,37 +1,20 @@
-:-module(option, [option/6,
-                 oplistVerifier/2]).
+:-module(option_17986494_SepulvedaBallesteros, [option/6,
+                                               oplistVerifier/2,
+                                               msgInOptionList/4]).
 
-%Dominios
-%Code = integer
-%Message = string
-%ChatbotCodeLink = integer
-%InitialFlowLink = integer
-%Keywords = list
-%Option = list (TDA option)
-%Oplist = list
 
-%Predicados:
-% option(Code,Message,ChatbotCodeLink,InitialFlowLink,Keywords,Option)
-% optionGetElements(Option,Code,Message,ChatbotCodeLink,InitialFlowLink,Kewwords)
-% oplistVerifier(Oplist, Oplist)
-% opIsNotDuplicated(Code,Oplist)
-% stringlist(Keywords)
-
-%Metas
-%Primarias
-%option/6
-%
-%Secundarias
-%optionGetElements/6
-%oplistVerifier/2
-%optionIsNotDuplicated/2
-%stringlist/1
 
 %Clausulas de Horn
 %Base de conocimiento
 
-
 %Reglas
+
+%Predicado
+% option(Code,Message,ChatbotCodeLink,InitialFlowLink,Keywords,Option)
+%Dominio: Code (int) X Message (string) X ChatbotCodeLink (int)
+%InitialFlowLink (string) X Keywords (list) X Option (TDA option)
+% Meta primaria: option/6
+% Metas secundarias: integer/1 , >=/2 , string/1 , string/1 , stringlist/1
 option(Code, Mens, Cblink, Flink, Keys, Option):-
     integer(Code), Code >= 0,
     string(Mens),
@@ -40,28 +23,57 @@ option(Code, Mens, Cblink, Flink, Keys, Option):-
     stringlist(Keys),
     Option = [Code, Mens, Cblink, Flink, Keys].
 
-optionGetElements(Option, E1, E2, E3, E4, E5):-
-    nth0(0, Option, E1),
-    nth0(1, Option, E2),
-    nth0(2, Option, E3),
-    nth0(3, Option, E4),
-    nth0(4, Option, E5).
+%Predicado
+% optionGetElements(Option,Code,Message,ChatbotCodeLink,InitialFlowLink,Keywords)
+%Dominio: Option (TDA option) X Code (int) X Message (string) X
+%ChatbotCodeLink (int) InitialFlowLink (string) X Keywords (list)
+% Meta primaria: optionGetElements/6
+optionGetElements([E1, E2, E3, E4, E5], E1, E2, E3, E4, E5).
 
-stringlist([]):-!.
+%Predicado
+% stringlist(List)
+%Dominio: List (list)
+% Meta primaria: stringlist/1
+% Metas secundarias: string/1 , stringlist/1
+stringlist([]).
 stringlist([A|B]):-
     string(A),
     stringlist(B).
 
+%Predicado
+% oplistVerifier(Optionlist,Optionlist)
+%Dominio: Optionlist (list of options) X Optionlist (list of options)
+% Meta primaria: oplistVerifier/2
+% Metas secundarias: optionGetElements/5 , opIsNotDuplicated/2 , oplistVerifier/2
 oplistVerifier([],[]).
-oplistVerifier([Op|Res],[Opt|Rest]):-
-    optionGetElements(Op,Code,R2,R3,R4,R5),
-    option(Code,R2,R3,R4,R5,Opt),
-    opIsNotDuplicated(Code,Res),
-    oplistVerifier(Res,Rest).
+oplistVerifier([Option|Resto],[Option|OpAcum]):-
+    optionGetElements(Option,Code,_,_,_,_),
+    opIsNotDuplicated(Code,Resto),
+    oplistVerifier(Resto,OpAcum).
+oplistVerifier([Op|Resto],OpAcum):-
+    optionGetElements(Op,Code,_,_,_,_),
+    \+ opIsNotDuplicated(Code,Resto),
+    oplistVerifier(Resto,OpAcum).
 
+%Predicado
+% opIsNotDuplicated(Option,Optionlist)
+%Dominio: Option (TDA option) X Optionlist (list)
+% Meta primaria: opIsNotDuplicated/2
+% Metas secundarias: optionGetElements/5 , \=/2 , opIsNotDuplicated/2
 opIsNotDuplicated(_,[]).
-opIsNotDuplicated(Code,[HOp|Oplist]):-
-    optionGetElements(HOp,Code2,_,_,_,_),
-    Code\= Code2,
+opIsNotDuplicated(Code,[Op|Oplist]):-
+    optionGetElements(Op,Code2,_,_,_,_),
+    Code \= Code2,
     opIsNotDuplicated(Code,Oplist).
 
+%Predicado
+% msgInOption(Message,Option,ChatbotCodeLink,InitialFlowLink)
+%Dominio: Message (int or string) X Option (TDA option) X
+%ChatbotCodeLink (int) X InitialFlowLink (int)
+% Meta primaria: msgInOption/4
+% Metas secundarias:
+msgInOptionList(Msg,[Option|_],Cblink,Flink):-
+    optionGetElements(Option,Code,_,Cblink,Flink,Keywords),
+    (string_lower(Msg,MsgFin) , member(MsgFin,Keywords) ; number_string(MsgNum,Msg), MsgNum = Code).
+msgInOptionList(Msg,[_|Oplist],Cblink,Flink):-
+    msgInOptionList(Msg,Oplist,Cblink,Flink).

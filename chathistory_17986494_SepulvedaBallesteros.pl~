@@ -1,11 +1,10 @@
-:-module(chathistory, [chathistory/1]).
+:-module(chathistory_17986494_SepulvedaBallesteros, [chathistory/1]).
 
 %Dominios
 %ChatHistory = list
 
 chathistory([]).
-chathistory([Chat|Resto]):-
-    Chat = [Cblink,Flink,Msg],
+chathistory([[Cblink,Flink,Msg]|Resto]):-
     string(Msg),
     integer(Cblink),
     integer(Flink),

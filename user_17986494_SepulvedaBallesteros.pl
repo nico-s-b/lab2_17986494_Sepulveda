@@ -1,9 +1,8 @@
 :-module(user_17986494_SepulvedaBallesteros, [user/2,
-               user/3,
-               usersVerifier/2,
-               userInList/2,
-               userInList/3]).
-:-use_module(chathistory_17986494_SepulvedaBallesteros, [chathistory/1]).
+                                              user/3,
+                                              userInList/2,
+                                              userInList/3]).
+:-use_module(chathistory_17986494_SepulvedaBallesteros).
 %Dominios
 %Username = string
 %User = list (TDA user)
@@ -15,12 +14,8 @@ user(Username, UserF):-
     UserF = [Username, ChatHistory].
 user(Username,ChatHistory,UserF):-
     string(Username),
-    chathistory(ChatHistory),
+    chatVerifier(ChatHistory),
     UserF = [Username, ChatHistory].
-
-usersVerifier([],[]).
-usersVerifier(User,[[U|Chat]|Userlist]):-
-    \+ userInList(User,Userlist).
 
 userInList(User,[[User,_]|_]).
 userInList(User,[_|List]):-

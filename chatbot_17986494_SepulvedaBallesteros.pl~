@@ -1,8 +1,8 @@
 :-module(chatbot_17986494_SepulvedaBallesteros, [chatbot/6,
-                  chatbotAddFlow/3,
-                  chatbotsVerifier/2,
-                  getChatbotFromList/3,
-                  chatbotGetElements/6]).
+                                                 chatbotAddFlow/3,
+                                                 chatbotsVerifier/2,
+                                                 getChatbotFromList/3,
+                                                 chatbotGetElements/6]).
 :-use_module(flow_17986494_SepulvedaBallesteros).
 
 
@@ -33,7 +33,7 @@ chatbot(CbotID, Name, WelcMens, StartFlowID, Flows, Chatbot):-
 %Chatbot (TDA chatbot) X ChatbotId(int) X Name (string) X WelcomeMessage (string) X
 %StartFlowId (int) X Flows (list of flows)
 %Meta primaria: chatbotGetElements/6
-chatbotGetElements([E1,E2,E3,E4,E5,_], E1, E2, E3, E4, E5).
+chatbotGetElements([E1,E2,E3,E4,E5], E1, E2, E3, E4, E5).
 
 %Predicado
 % chatbotAddFlow(Chatbot,Flow,Chatbot)
@@ -42,11 +42,16 @@ chatbotGetElements([E1,E2,E3,E4,E5,_], E1, E2, E3, E4, E5).
 %Meta primaria: chatbotAddFlow/3
 %Metas secundarias:
 %chatbotGetElements/6 , addFlow/3 , flowsVerifier/2 , chatbot/6
-chatbotAddFlow(CbotIni,Flow,CbotFin):-
+chatbotAddFlow2(CbotIni,Flow,CbotFin):-
     chatbotGetElements(CbotIni, E1, E2, E3, E4, Flows),
     addFlow(Flow,Flows,ResFlows),
     flowsVerifier(ResFlows,FlowsFin),
     chatbot(E1,E2,E3,E4,FlowsFin,CbotFin).
+chatbotAddFlow2(Chatbot,Flow,Chatbot):-
+    chatbotGetElements(Chatbot, _, _, _, _, Flows),
+    addFlow(Flow,Flows,ResFlows),
+    \+ flowsVerifier(ResFlows,_).
+
 
 %Predicado
 % addFlow(Flows,Flow,Flows)
@@ -58,19 +63,41 @@ addFlow(Flow,[],[Flow]).
 addFlow(Flow,[H|T],[H|ResFlows]):-
     addFlow(Flow,T,ResFlows).
 
+
+chatbotAddFlow(CbotIni,Flow,CbotFin):-
+    chatbotGetElements(CbotIni, E1, E2, E3, E4, Flows),
+    chatbotAddFlowRec(Flow,Flows,FlowsFin),
+    chatbot(E1,E2,E3,E4,FlowsFin,CbotFin).
+
+chatbotAddFlowRec(Flow,[],[Flow]).
+chatbotAddFlowRec(Flow,[KeepFlow|Flows],[KeepFlow|FlowsAcum]):-
+    flowGetElements(Flow,FlowId,_,_),
+    flowGetElements(KeepFlow,KeepFlowId,_,_),
+    FlowId \= KeepFlowId,
+    chatbotAddFlowRec(Flow,Flows,FlowsAcum).
+chatbotAddFlowRec(Flow,[KeepFlow|Flows],Flows):-
+    flowGetElements(Flow,FlowId,_,_),
+    flowGetElements(KeepFlow,KeepFlowId,_,_),
+    FlowId = KeepFlowId.
+
+
 %Predicado
 % chatbotsVerifier(Chatbots, Chatbots)
 % Dominio:
 % Chatbots (list of chatbots) X Chatbots (list of chatbots)
 % Meta primaria: chatbotsVerifier/2
 % Metas secundarias:
-% chatbotGetElements/6 , chatbot/6 , chatbotIsNotDuplicated/2 , chatbotsVerifier/2
+% chatbotGetElements/6 , chatbot/6 , chatbotIsNotDuplicated/2 , chatbotsVerifier/2 , \+/1
 chatbotsVerifier([],[]).
-chatbotsVerifier([Cbot|Res],[Cbot2|Rest]):-
-    chatbotGetElements(Cbot,Id,E2,E3,E4,E5),
-    chatbot(Id,E2,E3,E4,E5,Cbot2),
-    chatbotIsNotDuplicated(Id,Res),
-    chatbotsVerifier(Res,Rest).
+chatbotsVerifier([Chatbot|Resto],[Chatbot|ChatbotAcum]):-
+    chatbotGetElements(Chatbot,Id,_,_,_,_),
+    chatbotIsNotDuplicated(Id,Resto),     %No hay duplicados
+    chatbotsVerifier(Resto,ChatbotAcum).
+chatbotsVerifier([Cbot|Resto],ChatbotAcum):-
+    chatbotGetElements(Cbot,Id,_,_,_,_),
+    \+ chatbotIsNotDuplicated(Id,Resto),  %Encontrar duplicados
+    chatbotsVerifier(Resto,ChatbotAcum).
+
 
 %Predicado
 % chatbotIsNotDuplicated(ChatbotId,Chatbots)
