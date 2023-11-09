@@ -44,7 +44,7 @@ chatbotGetElements([E1,E2,E3,E4,E5], E1, E2, E3, E4, E5).
 % chatbotGetElements/6 , chatbotAddFloeRec/3 , chatbot/6
 chatbotAddFlow(CbotIni,Flow,CbotFin):-
     chatbotGetElements(CbotIni, E1, E2, E3, E4, Flows),
-    chatbotAddFlowRec(Flow,Flows,FlowsFin),
+    chatbotAddFlowRec(Flow,Flows,FlowsFin),           %Función recursiva auxiliar que añade Flows
     chatbot(E1,E2,E3,E4,FlowsFin,CbotFin).
 % chatbotAddFlowRec(Flow,Flows,Flows)
 %Dominio: Flow (TDA flow) X Flows (list of flows) X Flows (list of flows)

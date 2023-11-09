@@ -1,7 +1,7 @@
 :-module(user_17986494_SepulvedaBallesteros, [user/2,
                                               user/3,
                                               userInList/2,
-                                              userInList/3]).
+                                              getUserChatH/3]).
 :-use_module(chathistory_17986494_SepulvedaBallesteros).
 %Dominios
 %Username = string
@@ -20,6 +20,6 @@ user(Username,ChatHistory,UserF):-
 userInList(User,[[User,_]|_]).
 userInList(User,[_|List]):-
     userInList(User,List).
-userInList(User,[[User|ChatH]|_],ChatH).
-userInList(User,[_|List],_):-
-    userInList(User,List,_).
+getUserChatH(User,[[User,ChatH]|_],ChatH).
+getUserChatH(User,[_|List],ChatH):-
+    getUserChatH(User,List,ChatH).
