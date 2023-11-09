@@ -10,7 +10,7 @@
 
 %Reglas
 
-%Predicado
+%Predicado constructor
 % flow(Id, Name-msg, Oplist, Flow)
 %Dominio:
 % Id (int) X Name (string) X Oplist (list of options) X Flow (TDA flow)
@@ -22,14 +22,7 @@ flow(Id, Name, Oplist, Flow):-
     oplistVerifier(Oplist,RevOplist),
     Flow = [Id, Name, RevOplist].
 
-%Predicado:
-% flowGetElements(Flow, Id, Name, Oplist)
-%Dominio:
-%Flow (TDA flow) X Id (int) X Name (string) X Oplist (list of options)
-% Meta primaria: flowGetElements/4
-flowGetElements([E1, E2, E3], E1, E2, E3).
-
-%Predicado
+%Predicado modificador
 % flowAddOption(Flow, Option, Flow)
 %Dominio: Flow (TDA flow) X Option (TDA option) X Flow (TDA flow)
 % Meta primaria: flowAddOption/3
@@ -44,7 +37,7 @@ flowAddOption(Flow, Option, Flow):-
     append(Oplist,[Option], Oplist2),
     \+ oplistVerifier(Oplist2,_).
 
-%Predicado
+%Predicado de pertenencia
 % flowVerifier(Flowlist)
 %Dominio: Flowlist (list of flows) X Flowlist (list of flows)
 % Meta primaria: flowsVerifier/2
@@ -72,7 +65,7 @@ flowIsNotDuplicated(Id,[Flow|Flowlist]):-
     Id \= E1,
     flowIsNotDuplicated(Id,Flowlist).
 
-%Predicado
+%Predicado selector
 % getFlowFromList(FlowId, Flows, Flow)
 % Dominio:
 % Id (int) , Flows (list of flows) , Flow (TDA flow)
@@ -83,3 +76,10 @@ getFlowFromList(Id, [Flow|_], Flow):-
 % Metas secundarias: getChatbotFromList/3
 getFlowFromList(Id,[_|Flows],Flow):-
     getFlowFromList(Id,Flows,Flow).
+
+%Predicado selector
+% flowGetElements(Flow, Id, Name, Oplist)
+%Dominio:
+%Flow (TDA flow) X Id (int) X Name (string) X Oplist (list of options)
+% Meta primaria: flowGetElements/4
+flowGetElements([E1, E2, E3], E1, E2, E3).

@@ -1,6 +1,7 @@
 :-module(option_17986494_SepulvedaBallesteros, [option/6,
                                                oplistVerifier/2,
-                                               msgInOptionList/4]).
+                                               msgInOptionList/4,
+                                               optionGetElements/6]).
 
 
 
@@ -9,7 +10,7 @@
 
 %Reglas
 
-%Predicado
+%Predicado constructor
 % option(Code,Message,ChatbotCodeLink,InitialFlowLink,Keywords,Option)
 %Dominio: Code (int) X Message (string) X ChatbotCodeLink (int)
 %InitialFlowLink (string) X Keywords (list) X Option (TDA option)
@@ -23,24 +24,7 @@ option(Code, Mens, Cblink, Flink, Keys, Option):-
     stringlist(Keys),
     Option = [Code, Mens, Cblink, Flink, Keys].
 
-%Predicado
-% optionGetElements(Option,Code,Message,ChatbotCodeLink,InitialFlowLink,Keywords)
-%Dominio: Option (TDA option) X Code (int) X Message (string) X
-%ChatbotCodeLink (int) InitialFlowLink (string) X Keywords (list)
-% Meta primaria: optionGetElements/6
-optionGetElements([E1, E2, E3, E4, E5], E1, E2, E3, E4, E5).
-
-%Predicado
-% stringlist(List)
-%Dominio: List (list)
-% Meta primaria: stringlist/1
-% Metas secundarias: string/1 , stringlist/1
-stringlist([]).
-stringlist([A|B]):-
-    string(A),
-    stringlist(B).
-
-%Predicado
+%Predicado de pertenencia
 % oplistVerifier(Optionlist,Optionlist)
 %Dominio: Optionlist (list of options) X Optionlist (list of options)
 % Meta primaria: oplistVerifier/2
@@ -79,3 +63,20 @@ msgInOptionList(Msg,[Option|_],Cblink,Flink):-
 % Metas secundarias: msgInOptionList/4
 msgInOptionList(Msg,[_|Oplist],Cblink,Flink):-
     msgInOptionList(Msg,Oplist,Cblink,Flink).
+
+%Predicado Selector
+% optionGetElements(Option,Code,Message,ChatbotCodeLink,InitialFlowLink,Keywords)
+%Dominio: Option (TDA option) X Code (int) X Message (string) X
+%ChatbotCodeLink (int) InitialFlowLink (string) X Keywords (list)
+% Meta primaria: optionGetElements/6
+optionGetElements([E1, E2, E3, E4, E5], E1, E2, E3, E4, E5).
+
+%Predicado
+% stringlist(List)
+%Dominio: List (list)
+% Meta primaria: stringlist/1
+% Metas secundarias: string/1 , stringlist/1
+stringlist([]).
+stringlist([A|B]):-
+    string(A),
+    stringlist(B).

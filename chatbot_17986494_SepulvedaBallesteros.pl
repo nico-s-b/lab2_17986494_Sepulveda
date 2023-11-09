@@ -11,7 +11,7 @@
 
 %Reglas
 
-%Predicado
+%Predicado constructor
 % chatbot(ChatbotId,Name,WelcomeMessage,StartFlowId,Flows,Chatbot)
 % Dominio:
 %ChatbotId(int) X Name (string) X WelcomeMessage (string) X
@@ -27,15 +27,7 @@ chatbot(CbotID, Name, WelcMens, StartFlowID, Flows, Chatbot):-
     flowsVerifier(Flows,RevFlows),
     Chatbot = [CbotID, Name, WelcMens, StartFlowID, RevFlows].
 
-%Predicado
-% chatbotGetElements(ChatbotId,Name,WelcomeMessage,StartFlowId,Flows,Chatbot)
-%Dominio:
-%Chatbot (TDA chatbot) X ChatbotId(int) X Name (string) X WelcomeMessage (string) X
-%StartFlowId (int) X Flows (list of flows)
-%Meta primaria: chatbotGetElements/6
-chatbotGetElements([E1,E2,E3,E4,E5], E1, E2, E3, E4, E5).
-
-%Predicado chatbotAddFlow
+%Predicado modificador
 % chatbotAddFlow(Chatbot,Flow,Chatbot)
 %Dominio:
 %Chatbot (TDA chatbot) X Flow (TDA flow) X Chatbot (TDA chatbot)
@@ -61,7 +53,7 @@ chatbotAddFlowRec(Flow,[KeepFlow|Flows],Flows):-
     flowGetElements(KeepFlow,KeepFlowId,_,_),
     FlowId = KeepFlowId.
 
-%Predicado
+%Predicado de pertenencia
 % chatbotsVerifier(Chatbots, Chatbots)
 % Dominio:
 % Chatbots (list of chatbots) X Chatbots (list of chatbots)
@@ -91,7 +83,7 @@ chatbotIsNotDuplicated(Id,[Cbot|Res]):-
     Id \= Id2,
     chatbotIsNotDuplicated(Id,Res).
 
-%Predicado
+%Predicado selector
 % getChatbotFromList(ChatbotId, Chatbots, Chatbot)
 % Dominio:
 % ChatbotId (int) , Chatbots (list of chatbots) , Chatbot (TDA chatbot)
@@ -102,3 +94,11 @@ getChatbotFromList(CbotId, [Cbot|_], Cbot):-
 % Metas secundarias: getChatbotFromList/3
 getChatbotFromList(CbotId,[_|Chatbots],Cbot):-
     getChatbotFromList(CbotId,Chatbots,Cbot).
+
+%Predicado selector
+% chatbotGetElements(ChatbotId,Name,WelcomeMessage,StartFlowId,Flows,Chatbot)
+%Dominio:
+%Chatbot (TDA chatbot) X ChatbotId(int) X Name (string) X WelcomeMessage (string) X
+%StartFlowId (int) X Flows (list of flows)
+%Meta primaria: chatbotGetElements/6
+chatbotGetElements([E1,E2,E3,E4,E5], E1, E2, E3, E4, E5).

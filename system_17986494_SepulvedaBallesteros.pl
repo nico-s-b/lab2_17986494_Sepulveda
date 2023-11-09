@@ -3,14 +3,17 @@
                                                 systemAddUser/3,
                                                 systemLogin/3,
                                                 systemLogout/2,
-                                                systemTalkRec/3]).
+                                                systemTalkRec/3,
+                                                systemSynthesis/3]).
 
 :-use_module(option_17986494_SepulvedaBallesteros).
 :-use_module(flow_17986494_SepulvedaBallesteros).
 :-use_module(chatbot_17986494_SepulvedaBallesteros).
 :-use_module(user_17986494_SepulvedaBallesteros).
+:-use_module(chathistory_17986494_SepulvedaBallesteros).
 
-%Predicado system
+
+%Predicado constructor
 % system(Name,InitialChatbotCodeLink,Chatbots,System)
 %Dominio:
 % Name (string) X InitialChatbotCodeLink (int) X Chatbots (list of
@@ -31,14 +34,7 @@ system(Name, IniCbotCodeLink, Chatbots,System):-
 system(N,ICCL,CB,Userlist,User,System):-
     System = [N,ICCL,CB,Userlist,User].
 
-% Predicado systemGetElements
-% systemGetElements(System,Name,InitialChatbotCodeLink,Chatbots,Userlist,User)
-% Meta primaria: systemGetElemets/6
-% Dominio: System (TDA system) X Name (string) X InitialChatbotCodeLink (int) X
-% Chatbots (list of chatbots) X Userlist (list of user) X User (string)
-systemGetElements([E1,E2,E3,E4,E5],E1,E2,E3,E4,E5).
-
-%Predicado
+%Predicado Modificador
 % systemAddChatbot(System,Chatbot,System)
 %Dominio: System (TDA system) X Chatbot (TDA chatbot) X System (TDA system)
 % Meta primaria: systemAddChatbot/3
@@ -53,7 +49,7 @@ systemAddChatbot(System,Chatbot,System):-
     append(Chatbots,[Chatbot],ChatbotsFin),
     \+ chatbotsVerifier(ChatbotsFin,_).
 
-%Predicado
+%Predicado Modificador
 % systemAddUser(System,User,System)
 %Dominio: System (TDA system) X User (string) X System (TDA system)
 % Meta primaria: systemAddUser/3
@@ -100,8 +96,9 @@ systemTalkRec(System,_,System):-
     \+ string(User).
 %Caso: mensaje NO es una opción válida
 % Metas secundarias: systemGetElements/6 , userInList/3 , getChatbotFromList/3
-% chatbotGetElements/6 , getFlowFromList/3 , \+/2 , msgInOpionList/4 , =/2 ,
-% append/3 , user/3 , updateUserChatH/3 , system/6
+% chatbotGetElements/6 , getFlowFromList/3 , \+/2 , get_time/1 ,
+% format_time/3 , msgInOpionList/4 , =/2 , append/3 , user/3 ,
+% updateUserChatH/3 , system/6
 systemTalkRec(System, Msg, SystemT):-
     systemGetElements(System,E1,CbotCodeLink,Chatbots,UserlistIni,User),
     getChatbotFromList(CbotCodeLink,Chatbots,Chatbot),  %Encontrar Chatbot asociado
@@ -109,7 +106,9 @@ systemTalkRec(System, Msg, SystemT):-
     getFlowFromList(FlowCode,Flows,Flow),     %Encontrar Flow actual
     flowGetElements(Flow,FlowCode,_,Oplist),
     \+ msgInOptionList(Msg,Oplist,_,_),       %Mensaje NO es una opción válida
-    Chat = [CbotCodeLink,FlowCode,Msg],    %Construir Elemento de Chat
+    get_time(T),
+    format_time(string(Time),'%FT%T%:z',T),
+    Chat = [Time,CbotCodeLink,FlowCode,Msg],    %Construir Elemento de Chat
     getUserChatH(User,UserlistIni,ChatHIni),     %Obtener ChatHistory de User
     append(ChatHIni,[Chat],ChatHFin),           %Agregar elemento de Chat a ChatHistory
     user(User,ChatHFin,UserF),                %Actualizar UserF
@@ -117,8 +116,9 @@ systemTalkRec(System, Msg, SystemT):-
     system(E1,CbotCodeLink,Chatbots,UserlistFin,User,SystemT).
 %Caso: mensaje SI es una opción válida
 % Metas secundarias: systemGetElements/6 , userInList/3 , getChatbotFromList/3
-% chatbotGetElements/6 , getFlowFromList/3 , msgInOpionList/4 , =/2
-% append/3 , user/3 , updateUserChatH/3 , updateChatbotFlowCode/4 , system/6
+% chatbotGetElements/6 , getFlowFromList/3 , msgInOpionList/4 ,
+% get_time/1 , format_time/3 , =/2 append/3 , user/3 , updateUserChatH/3 ,
+% updateChatbotFlowCode/4 , system/6
 systemTalkRec(System,Msg,SystemT):-
     systemGetElements(System,E1,CbotCodeLinkIni,Chatbots,UserlistIni,User),
     getChatbotFromList(CbotCodeLinkIni,Chatbots,Chatbot),  %Encontrar Chatbot asociado
@@ -126,7 +126,9 @@ systemTalkRec(System,Msg,SystemT):-
     getFlowFromList(FlowId,Flows,Flow),     %Encontrar Flow actual
     flowGetElements(Flow,FlowId,_,Oplist),
     msgInOptionList(Msg,Oplist,NewCbotCodeLink,NewFlowId),       %Mensaje SI es una opción válida
-    Chat = [NewCbotCodeLink,NewFlowId,Msg],    %Construir Elemento de Chat
+    get_time(T),
+    format_time(string(Time),'%FT%T%:z',T),
+    Chat = [Time,NewCbotCodeLink,NewFlowId,Msg],    %Construir Elemento de Chat
     getUserChatH(User,UserlistIni,ChatHIni),     %Obtener ChatHistory de User
     append(ChatHIni,[Chat],ChatHFin),           %Agregar elemento de Chat a ChatHistory
     user(User,ChatHFin,UserF),                %Actualizar UserF
@@ -134,11 +136,12 @@ systemTalkRec(System,Msg,SystemT):-
     updateChatbotFlowCode(NewCbotCodeLink,NewFlowId,Chatbots,ChatbotsFin),
     system(E1,NewCbotCodeLink,ChatbotsFin,UserlistFin,User,SystemT).
 
-%Predicado
-% updateUserChatH(Chatbot,Chatbots,Chatbots)
-%Dominio: Chatbot (TDA chatbot) X Chatbots (list of chatbots) X Chatbots (list of chatbots)
-% Meta primaria: updateUserChatH/3
-% Metas secundarias: updateUserChatH/3 , \=/2
+% Predicados auxiliares a SystemTalkRec
+% **************************************
+% updateUserChatH(Chatbot,Chatbots,Chatbots) Dominio: Chatbot (TDA
+% chatbot) X Chatbots (list of chatbots) X Chatbots (list of chatbots)
+% Meta primaria: updateUserChatH/3 Metas secundarias: updateUserChatH/3 ,
+% \=/2
 updateUserChatH(_,[],[]).
 updateUserChatH([Username,NewChatH],[[Username,_]|Userlist],[[Username,NewChatH]|UserlistFin]):-
     updateUserChatH([Username,NewChatH],Userlist,UserlistFin).
@@ -177,3 +180,34 @@ replaceChatbot(CbCode,ChatbotFin,[Chatbot2|Chatbots],[Chatbot2|ChatbotsAcum]):-
 % systemSyhthesis(System,User,Str)
 %Dominio: System (TDA system) X User (string) X Str (string)
 % Meta primaria: systemSynthesis/3
+% Metas secundarias: systemGetElements/6 , getUserChatH/3 , formatChatH/5
+systemSynthesis(System, User, Str):-
+    systemGetElements(System, _, _, Chatbots, Userlist, _),
+    getUserChatH(User,Userlist,ChatH),
+    formatChatH(User, Chatbots, ChatH,"", Str).
+
+%Predicado
+% formatChatH(User,Chatbots,ChatH,StrAcc,FormatedStr)
+%Dominio: User (string) X Chatbots (list of chatbots) X ChatH (TDA chathistory) X
+%StrAcc (string) X FormatedStr (string)
+% Meta primaria: formatChatH/5
+% Metas secundarias: getChatbotFromList/3 , chatbotGetElements/6 ,
+% getFlowFromList/3 , flowGetElements/4 , chatToStr/7 , string_concat/3 , formatChatH/5
+formatChatH(_,_,[],StrRes,StrRes).
+formatChatH(User,Chatbots,[[Time,CbotId,FlowId,Msg]|ChatH],StrAcum,StrRes):-
+    getChatbotFromList(CbotId,Chatbots,Chatbot),
+    chatbotGetElements(Chatbot,_,CbotName,_,_,Flows),
+    getFlowFromList(FlowId,Flows,Flow),
+    flowGetElements(Flow,_,FlowMens,Oplist),
+    chatToStr(User,Time,Msg,CbotName,FlowMens,Oplist,ChatStr),
+    string_concat(StrAcum,ChatStr,StrTemp),
+    string_concat(StrTemp,"\n",StrAcumNew),
+    formatChatH(User,Chatbots,ChatH,StrAcumNew,StrRes).
+
+
+% Predicado selector
+% systemGetElements(System,Name,InitialChatbotCodeLink,Chatbots,Userlist,User)
+% Meta primaria: systemGetElemets/6
+% Dominio: System (TDA system) X Name (string) X InitialChatbotCodeLink (int) X
+% Chatbots (list of chatbots) X Userlist (list of user) X User (string)
+systemGetElements([E1,E2,E3,E4,E5],E1,E2,E3,E4,E5).
