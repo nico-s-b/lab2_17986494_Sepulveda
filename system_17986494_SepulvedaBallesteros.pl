@@ -1,19 +1,6 @@
-:-module(system_17986494_SepulvedaBallesteros, [system/4,
-                                                systemAddChatbot/3,
-                                                systemAddUser/3,
-                                                systemLogin/3,
-                                                systemLogout/2,
-                                                systemTalkRec/3,
-                                                systemSynthesis/3]).
-
-:-use_module(option_17986494_SepulvedaBallesteros).
-:-use_module(flow_17986494_SepulvedaBallesteros).
-:-use_module(chatbot_17986494_SepulvedaBallesteros).
-:-use_module(user_17986494_SepulvedaBallesteros).
-:-use_module(chathistory_17986494_SepulvedaBallesteros).
 
 
-%Predicado constructor
+%Predicado constructor de un nuevo sistema
 % system(Name,InitialChatbotCodeLink,Chatbots,System)
 %Dominio:
 % Name (string) X InitialChatbotCodeLink (int) X Chatbots (list of
@@ -26,15 +13,16 @@ system(Name, IniCbotCodeLink, Chatbots,System):-
     chatbotsVerifier(Chatbots, RevChatbots),
     System = [Name, IniCbotCodeLink, RevChatbots,[],0].
 
+%Predicado especial para reconstruir sistemas ya creados.
 % system(Name,InitialChatbotCodeLink,Chatbots,Userlist,User,System)
-%Dominio:
-% Name (string) X InitialChatbotCodeLink (int) X Chatbots (list of
+%Dominio: Name (string) X InitialChatbotCodeLink (int) X Chatbots (list of
 % chatbots) X Userlist (list uf users) X User (string) System (TDA system)
 % Meta primaria: system/6
 system(N,ICCL,CB,Userlist,User,System):-
     System = [N,ICCL,CB,Userlist,User].
 
 %Predicado Modificador
+%Añade un nuevo chatbot al sistema. Verifica que no esté duplicado.
 % systemAddChatbot(System,Chatbot,System)
 %Dominio: System (TDA system) X Chatbot (TDA chatbot) X System (TDA system)
 % Meta primaria: systemAddChatbot/3
@@ -50,6 +38,8 @@ systemAddChatbot(System,Chatbot,System):-
     \+ chatbotsVerifier(ChatbotsFin,_).
 
 %Predicado Modificador
+% Registra un nuevo usuario en el sistema creando un TDA user, evitando
+% la duplicación de usuarios con igual username
 % systemAddUser(System,User,System)
 %Dominio: System (TDA system) X User (string) X System (TDA system)
 % Meta primaria: systemAddUser/3
@@ -61,9 +51,10 @@ systemAddUser(SystemIni,User,SystemFin):-
     user(User,UserF),
     append(UserlistIni,[UserF],Userlist),
     system(E1,E2,E3,Userlist,E5,SystemFin).
-systemAddUser(System,_,System).
+systemAddUser(System,_,System).  %BORRAR ACA
 
-%Predicado
+% Predicado para que un usuario inicie sesión en el sistema. Evita
+% iniciar sesión si el usuario no está registrado o si ya hay una sesión
 % systemLogin(System,User,System)
 %Dominio: System (TDA system) X User (string) X System (TDA system)
 % Meta primaria: systemLogin/3
@@ -72,9 +63,9 @@ systemLogin(System,User,SystemLog):-
     systemGetElements(System,E1,E2,E3,Userlist,0),!,
     userInList(User,Userlist),
     system(E1,E2,E3,Userlist,User,SystemLog).
-systemLogin(System,_,System).
+systemLogin(System,_,System). %BORRAR ACA
 
-%Predicado
+%Predicado que finaliza la sesión de un usuario en el sistema
 % systemLogout(System,System)
 %Dominio: System (TDA system) X System (TDA system)
 % Meta primaria: systemLogout/2
@@ -138,10 +129,11 @@ systemTalkRec(System,Msg,SystemT):-
 
 % Predicados auxiliares a SystemTalkRec
 % **************************************
-% updateUserChatH(Chatbot,Chatbots,Chatbots) Dominio: Chatbot (TDA
-% chatbot) X Chatbots (list of chatbots) X Chatbots (list of chatbots)
-% Meta primaria: updateUserChatH/3 Metas secundarias: updateUserChatH/3 ,
-% \=/2
+% Predicado que actualiza el historial de chat de un usuario
+% updateUserChatH(Chatbot,Chatbots,Chatbots)
+%Dominio: Chatbot (TDA chatbot) X Chatbots (list of chatbots) X Chatbots (list of chatbots)
+% Meta primaria: updateUserChatH/3
+% Metas secundarias: updateUserChatH/3 , \=/2
 updateUserChatH(_,[],[]).
 updateUserChatH([Username,NewChatH],[[Username,_]|Userlist],[[Username,NewChatH]|UserlistFin]):-
     updateUserChatH([Username,NewChatH],Userlist,UserlistFin).
@@ -150,12 +142,12 @@ updateUserChatH([Username,NewChatH],[[Username2,ChatH2]|Userlist],[[Username2,Ch
     updateUserChatH([Username,NewChatH],Userlist,UserlistFin).
 
 %Predicado
+% Predicado que actualiza el chatbot cargado en el sistema tras una interacción
 % updateChatbotFlowCode(ChatbotCodeLink,FlowId,Chatbots,Chatbots)
-%Dominio: ChatbotCodeLink (int) X FlowId (int) X Chatbots (list of
-%chatbots) X Chatbots (list of chatbots)
-% Meta primaria: updateChatbotFlowCode/4
-% Metas secundarias: getChatbotFromList/3 , chatbotGetElements/6 ,
-% chatbot/6 , replaceChatbot/4
+% Dominio: ChatbotCodeLink (int) X FlowId (int) X Chatbots (list of
+% chatbots) X Chatbots (list of chatbots) Meta primaria:
+% updateChatbotFlowCode/4 Metas secundarias: getChatbotFromList/3 ,
+% chatbotGetElements/6 , chatbot/6 , replaceChatbot/4
 updateChatbotFlowCode(CbCode,FlowId,Chatbots,ChatbotsFin):-
     getChatbotFromList(CbCode,Chatbots,Chatbot),
     chatbotGetElements(Chatbot,E1,E2,E3,_,E5),
@@ -176,9 +168,11 @@ replaceChatbot(CbCode,ChatbotFin,[Chatbot2|Chatbots],[Chatbot2|ChatbotsAcum]):-
     CbCode \= CbCode2,
     replaceChatbot(CbCode,ChatbotFin,Chatbots,ChatbotsAcum).
 
-%Predicado
+%*******************************
+
+%Predicado que entrega la síntesis de interacciones de un usuario como string
 % systemSyhthesis(System,User,Str)
-%Dominio: System (TDA system) X User (string) X Str (string)
+%Dominio: System (TDA system) X  User (string) X Str (string)
 % Meta primaria: systemSynthesis/3
 % Metas secundarias: systemGetElements/6 , getUserChatH/3 , formatChatH/5
 systemSynthesis(System, User, Str):-
@@ -186,7 +180,9 @@ systemSynthesis(System, User, Str):-
     getUserChatH(User,Userlist,ChatH),
     formatChatH(User, Chatbots, ChatH,"", Str).
 
-%Predicado
+%Predicado formatChatH
+% Construye recursivamente el string de síntesis a partir de los string
+% de interacción que construye chatToStr
 % formatChatH(User,Chatbots,ChatH,StrAcc,FormatedStr)
 %Dominio: User (string) X Chatbots (list of chatbots) X ChatH (TDA chathistory) X
 %StrAcc (string) X FormatedStr (string)
@@ -205,9 +201,105 @@ formatChatH(User,Chatbots,[[Time,CbotId,FlowId,Msg]|ChatH],StrAcum,StrRes):-
     formatChatH(User,Chatbots,ChatH,StrAcumNew,StrRes).
 
 
-% Predicado selector
+%Predicado systemSimulate
+% Genera una simulación de cierta cantidad de interacciones a partir de
+% una semilla, guardando las interacciones en el chatHistory correspondiente
+% systemSimulate(System,maxInteractions,Seed,System)
+%Dominio: System (TDA system) X maxInteractions (int) X
+%Seed (int) X System (TDA system)
+% Meta primaria: systemSimulate/4
+% Metas secundarias: number_string/2 , string_concat/3 , systemAddUser/3 ,
+% systemLogin/3 , interList/4 , simulating/3
+systemSimulate(System, 0, _, System).
+systemSimulate(SysIni, MaxInter, Seed, System):-
+    number_string(Seed,StrSeed),
+    string_concat("user",StrSeed,UserName),
+    systemAddUser(SysIni,UserName,SysUser),
+    systemLogin(SysUser,UserName,SysLog),
+    interList(MaxInter,Seed,[],List),
+    simulating(SysLog,List,System).
+
+% Predicados auxiliares a SystemSimulate
+% **************************************
+
+%Predicado simulating
+% Genera las simulaciones de forma recursiva para pasarlas a systemSimulate
+% Utiliza generateMens para obtener un mensaje para ejecutar systemTalkRec
+% simulating(System,List,System)
+% Dominio: System (TDA % system) X List (list) X System (TDA system)
+% Meta primaria: simulating/3
+% Metas secundarias: generateMens/3 , systemTalkRec/3 , simulating/3
+simulating(System,[],System).
+simulating(SysIni,[Rand|Rest],SysFin):-
+    generateMens(SysIni,Rand,Msg),
+    systemTalkRec(SysIni,Msg,SysNext),
+    write("\n"),
+    write(Msg),
+    write("\n"),
+    simulating(SysNext,Rest,SysFin).
+simulating(System,[_|Rest],System):-
+    simulating(System,Rest,System).
+
+%Predicado generateMens
+% Predicado auxiliar para generar una opción aleatoria válida a partir
+% de un número aleatorio
+% generateMens(System,Rand,Mens)
+%Dominio: System (TDA system) X Rand (int) X Mens (string)
+% Meta primaria: generateMens/3 Metas
+% secundarias: systemGetElements/6 , getChatbotFromList/3 ,
+% chatbotGetElements/6 , getFlowFromList/3 , flowGetElements/4
+% randMens/2 , msgInOptionList/4
+generateMens(System,Rand,Msg):-
+    systemGetElements(System,_,CbotCode,Chatbots,_,_),
+    getChatbotFromList(CbotCode,Chatbots,Chatbot),  %Encontrar Chatbot asociado
+    chatbotGetElements(Chatbot,_,_,_,FlowId,Flows),
+    getFlowFromList(FlowId,Flows,Flow),     %Encontrar Flow actual
+    flowGetElements(Flow,_,_,Oplist),
+    randMens(Rand,Msg),
+    msgInOptionList(Msg,Oplist,_,_).
+% Caso alternativo para seguir buscando un mensaje válido
+generateMens(System,Rand,Msg):-
+    NRand is Rand / 10,
+    NRand > 10,
+    generateMens(System,round(NRand),Msg).
+% En último caso, forzar mensaje, el cual provocará fallo en el
+% systemTalkRec deteniendo la simulación dando false.
+generateMens(_,_,"Fail message").
+
+
+%Predicado para generar, a partir de un número aleatorio, un mensaje en
+% el rango del 1 al 10, que podría servir como opción para systemTalkRec
+% randMens(Rand,Mens)
+%Dominio: Rand (int) X Mens (string)
+% Meta primaria: randMens/2
+% Metas secundarias:
+randMens(Rand,Mens):-
+    Aux is Rand mod 10,
+    number_string(Aux,Mens).
+
+% Predicado myRandom
+%Genera un número pseudoaleatorio a partir de una
+% semilla myRandom(Seed, RandNum) Dominio: Seed (int) X RandNum (int)
+% Meta primaria: myRandom/2 Metas secundarias: */2 , +/2 , is/2 , mod/2
+myRandom(Xn, Xn1):-
+    Xn1 is (1103515245 * Xn + 12345) mod 2147483648.
+
+%Predicado interList
+%Construye una lista con una secuencia de MaxInteractions números pseudoaleatorios
+% interList(MaxInteractions,Seed,List,List)
+%Dominio: MaxInteractions (int) X Seed (int) List (list) X List (list)
+% Meta primaria: interList/4
+% Metas secundarias: >/2 , myRandom/2 , is/2 , -/2 , interList/4
+interList(0,_,List,List).
+interList(MaxInter,Seed,Resto,Lista):-
+    MaxInter > 0,
+    myRandom(Seed,Rand),
+    NextInter is MaxInter - 1,
+    interList(NextInter, Rand,[Rand|Resto],Lista).
+
+%Predicado selector
 % systemGetElements(System,Name,InitialChatbotCodeLink,Chatbots,Userlist,User)
 % Meta primaria: systemGetElemets/6
-% Dominio: System (TDA system) X Name (string) X InitialChatbotCodeLink (int) X
+%Dominio: System (TDA system) X Name (string) X InitialChatbotCodeLink (int) X
 % Chatbots (list of chatbots) X Userlist (list of user) X User (string)
 systemGetElements([E1,E2,E3,E4,E5],E1,E2,E3,E4,E5).

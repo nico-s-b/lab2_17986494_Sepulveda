@@ -1,8 +1,3 @@
-:-module(user_17986494_SepulvedaBallesteros, [user/2,
-                                              user/3,
-                                              userInList/2,
-                                              getUserChatH/3]).
-:-use_module(chathistory_17986494_SepulvedaBallesteros).
 %Dominios
 %Username = string
 %User = list (TDA user)

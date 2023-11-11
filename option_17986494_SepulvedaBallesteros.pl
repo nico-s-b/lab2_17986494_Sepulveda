@@ -1,9 +1,3 @@
-:-module(option_17986494_SepulvedaBallesteros, [option/6,
-                                               oplistVerifier/2,
-                                               msgInOptionList/4,
-                                               optionGetElements/6]).
-
-
 
 %Clausulas de Horn
 %Base de conocimiento
@@ -21,8 +15,8 @@ option(Code, Mens, Cblink, Flink, Keys, Option):-
     string(Mens),
     integer(Cblink), Cblink >= 0,
     integer(Flink), Flink >= 0,
-    stringlist(Keys),
-    Option = [Code, Mens, Cblink, Flink, Keys].
+    stringlist(Keys,MinusKeys),
+    Option = [Code, Mens, Cblink, Flink, MinusKeys].
 
 %Predicado de pertenencia
 % oplistVerifier(Optionlist,Optionlist)
@@ -76,7 +70,8 @@ optionGetElements([E1, E2, E3, E4, E5], E1, E2, E3, E4, E5).
 %Dominio: List (list)
 % Meta primaria: stringlist/1
 % Metas secundarias: string/1 , stringlist/1
-stringlist([]).
-stringlist([A|B]):-
-    string(A),
-    stringlist(B).
+stringlist([],[]).
+stringlist([Str|Resto],[LowerStr|RestoLower]):-
+    string(Str),
+    string_lower(Str,LowerStr),
+    stringlist(Resto,RestoLower).

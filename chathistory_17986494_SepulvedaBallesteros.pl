@@ -1,7 +1,3 @@
-:-module(chathistory_17986494_SepulvedaBallesteros, [chatVerifier/1,
-                                                    chatToStr/7]).
-:-use_module(option_17986494_SepulvedaBallesteros).
-
 %ChatHistory = null|list
 
 %Predicado

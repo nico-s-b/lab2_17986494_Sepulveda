@@ -1,9 +1,3 @@
-:-module(flow_17986494_SepulvedaBallesteros, [flow/4,
-                                              flowAddOption/3,
-                                              flowsVerifier/2,
-                                              getFlowFromList/3,
-                                              flowGetElements/4]).
-:-use_module(option_17986494_SepulvedaBallesteros).
 
 %Clausulas de Horn
 %Base de conocimiento

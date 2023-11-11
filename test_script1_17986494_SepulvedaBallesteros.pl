@@ -9,7 +9,8 @@
                                                     systemLogin/3 as t_systemLogin,
                                                     systemLogout/2 as t_systemLogout,
                                                     systemTalkRec/3 as t_systemTalkRec,
-                                                    systemSynthesis/3 as t_systemSynthesis]).
+                                                    systemSynthesis/3 as t_systemSynthesis,
+						    systemSimulate/4 as t_systemSimulate]).
 
 
 test(S8,S9,S10,S11):-
@@ -46,6 +47,8 @@ t_systemLogin(S8,"user1",S9),
 t_systemTalkRec(S9,"hola",S10),
 t_systemTalkRec(S10,"1",S11),
 t_systemSynthesis(S11,"user1",Str),
-write(Str).
-
-
+write(Str),
+t_systemLogout(S11,S12),
+t_systemSimulate(S12,4,3122,S13),
+t_systemSynthesis(S13,"user3122",Str2),
+write(Str2).

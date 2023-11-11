@@ -1,10 +1,3 @@
-:-module(chatbot_17986494_SepulvedaBallesteros, [chatbot/6,
-                                                 chatbotAddFlow/3,
-                                                 chatbotsVerifier/2,
-                                                 getChatbotFromList/3,
-                                                 chatbotGetElements/6]).
-:-use_module(flow_17986494_SepulvedaBallesteros).
-
 
 %Clausulas de Horn
 %Base de conocimiento
