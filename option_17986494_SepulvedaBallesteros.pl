@@ -1,10 +1,14 @@
-
-%Clausulas de Horn
-%Base de conocimiento
+%TDA Option
+%Representación: Lista
+%Code (int)
+%Message(string)
+%ChatbotCode (int)
+%FlowCode (int)
+%Keywords (list of strings)
 
 %Reglas
 
-%Predicado constructor
+%Predicado constructor de una opcion
 % option(Code,Message,ChatbotCodeLink,InitialFlowLink,Keywords,Option)
 %Dominio: Code (int) X Message (string) X ChatbotCodeLink (int)
 %InitialFlowLink (string) X Keywords (list) X Option (TDA option)
@@ -18,7 +22,7 @@ option(Code, Mens, Cblink, Flink, Keys, Option):-
     stringlist(Keys,MinusKeys),
     Option = [Code, Mens, Cblink, Flink, MinusKeys].
 
-%Predicado de pertenencia
+%Predicado de pertenencia para verificar duplicados
 % oplistVerifier(Optionlist,Optionlist)
 %Dominio: Optionlist (list of options) X Optionlist (list of options)
 % Meta primaria: oplistVerifier/2
@@ -28,12 +32,14 @@ oplistVerifier([Option|Resto],[Option|OpAcum]):-
     optionGetElements(Option,Code,_,_,_,_),
     opIsNotDuplicated(Code,Resto),
     oplistVerifier(Resto,OpAcum).
-oplistVerifier([Op|Resto],OpAcum):-
-    optionGetElements(Op,Code,_,_,_,_),
-    \+ opIsNotDuplicated(Code,Resto),
-    oplistVerifier(Resto,OpAcum).
+% El siguiente predicado maneja errores y permitiría que, si hay
+% opciones duplicadas en base al ID, filtrara para solo incluir una ocurrencia
+%oplistVerifier([Op|Resto],OpAcum):-
+%    optionGetElements(Op,Code,_,_,_,_),
+%    \+ opIsNotDuplicated(Code,Resto),
+%    oplistVerifier(Resto,OpAcum).
 
-%Predicado
+%Predicado auxiliar que realiza la verificación de duplicados
 % opIsNotDuplicated(Option,Optionlist)
 %Dominio: Option (TDA option) X Optionlist (list)
 % Meta primaria: opIsNotDuplicated/2
@@ -44,7 +50,8 @@ opIsNotDuplicated(Code,[Op|Oplist]):-
     Code \= Code2,
     opIsNotDuplicated(Code,Oplist).
 
-%Predicado
+% Predicado que encuentra un mensaje dentro de una opción,
+% aprovechando explícitamente el backtraking para encontrar una opción
 % msgInOption(Message,Option,ChatbotCodeLink,InitialFlowLink)
 %Dominio: Message (int or string) X Option (TDA option) X
 %ChatbotCodeLink (int) X InitialFlowLink (int)
@@ -58,18 +65,19 @@ msgInOptionList(Msg,[Option|_],Cblink,Flink):-
 msgInOptionList(Msg,[_|Oplist],Cblink,Flink):-
     msgInOptionList(Msg,Oplist,Cblink,Flink).
 
-%Predicado Selector
+%Predicado Selector general para todos los elementos de Option
 % optionGetElements(Option,Code,Message,ChatbotCodeLink,InitialFlowLink,Keywords)
 %Dominio: Option (TDA option) X Code (int) X Message (string) X
 %ChatbotCodeLink (int) InitialFlowLink (string) X Keywords (list)
 % Meta primaria: optionGetElements/6
 optionGetElements([E1, E2, E3, E4, E5], E1, E2, E3, E4, E5).
 
-%Predicado
-% stringlist(List)
+% Predicado que verifica que las keywords sean strings y las deja en
+% minúsculas
+%stringlist(List)
 %Dominio: List (list)
 % Meta primaria: stringlist/1
-% Metas secundarias: string/1 , stringlist/1
+% Metas secundarias: string/1 , string_lower/2 , stringlist/1
 stringlist([],[]).
 stringlist([Str|Resto],[LowerStr|RestoLower]):-
     string(Str),

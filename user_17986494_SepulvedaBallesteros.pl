@@ -1,9 +1,9 @@
-%Dominios
-%Username = string
-%User = list (TDA user)
-%Userlist = list
+%TDA User
+%Representación: Lista: [Username,ChatHistory]
+%Username (string)
+%ChatHistory (list / TDA Chathistory)
 
-%Predicado constructor
+%Predicado constructor de un usuario nuevo
 % user(Username, User)
 %Dominio: Username (string) X User (TDA user)
 % Meta primaria: user/2
@@ -12,7 +12,8 @@ user(Username, UserF):-
     string(Username),
     ChatHistory = [],
     UserF = [Username, ChatHistory].
-%Predicado
+
+%Predicado que constryue un usuario con chat previo
 % user(Username, ChatHistory, User)
 %Dominio: Username (string) X ChatHistory (TDA chathistory) X User (TDA user)
 % Meta primaria: user/3
@@ -22,7 +23,7 @@ user(Username,ChatHistory,UserF):-
     chatVerifier(ChatHistory),
     UserF = [Username, ChatHistory].
 
-%Predicado
+%Predicado que verifica si un usuario está en una lista
 % userInList(User, Userlist)
 %Domino: User (string) X Userlist (list of users)
 % Meta primaria: userInList/2
@@ -31,7 +32,7 @@ userInList(User,[[User,_]|_]).
 userInList(User,[_|List]):-
     userInList(User,List).
 
-%Predicado selector
+%Predicado selector del chatHistory de un usuario
 % getUserChatH(User,Userlist,ChatHistory)
 %Dominio: User (string) X Userlist (list of users) X ChatHistory (TDA chathistory)
 % Meta primaria: getUserChatH/3

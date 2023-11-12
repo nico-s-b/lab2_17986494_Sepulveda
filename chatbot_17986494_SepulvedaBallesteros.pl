@@ -1,10 +1,14 @@
-
-%Clausulas de Horn
-%Base de conocimiento
+%TDA Flow
+%Representación: Lista
+%Id (int)
+%Name (string)
+%Message(string)
+%FlowCode (int)
+%Flows (list of Flows)
 
 %Reglas
 
-%Predicado constructor
+%Predicado constructor de un Chatbot
 % chatbot(ChatbotId,Name,WelcomeMessage,StartFlowId,Flows,Chatbot)
 % Dominio:
 %ChatbotId(int) X Name (string) X WelcomeMessage (string) X
@@ -20,7 +24,8 @@ chatbot(CbotID, Name, WelcMens, StartFlowID, Flows, Chatbot):-
     flowsVerifier(Flows,RevFlows),
     Chatbot = [CbotID, Name, WelcMens, StartFlowID, RevFlows].
 
-%Predicado modificador
+%Predicado modificador para agregar un flujo a un chatbot, impidiendo
+%agregar flujos duplicados según ID
 % chatbotAddFlow(Chatbot,Flow,Chatbot)
 %Dominio:
 %Chatbot (TDA chatbot) X Flow (TDA flow) X Chatbot (TDA chatbot)
@@ -41,12 +46,14 @@ chatbotAddFlowRec(Flow,[KeepFlow|Flows],[KeepFlow|FlowsAcum]):-
     flowGetElements(KeepFlow,KeepFlowId,_,_),
     FlowId \= KeepFlowId,
     chatbotAddFlowRec(Flow,Flows,FlowsAcum).
-chatbotAddFlowRec(Flow,[KeepFlow|Flows],Flows):-
-    flowGetElements(Flow,FlowId,_,_),
-    flowGetElements(KeepFlow,KeepFlowId,_,_),
-    FlowId = KeepFlowId.
+% El siguiente predicado permitiría manejar el caso de agregar flujos
+% repetidos al chatbot, devolviendo el chatbot sin cambios.
+%chatbotAddFlowRec(Flow,[KeepFlow|Flows],Flows):-
+%    flowGetElements(Flow,FlowId,_,_),
+%    flowGetElements(KeepFlow,KeepFlowId,_,_),
+%    FlowId = KeepFlowId.
 
-%Predicado de pertenencia
+%Predicado que controla si una lista de chatbots tiene repetidos
 % chatbotsVerifier(Chatbots, Chatbots)
 % Dominio:
 % Chatbots (list of chatbots) X Chatbots (list of chatbots)
@@ -58,13 +65,16 @@ chatbotsVerifier([Chatbot|Resto],[Chatbot|ChatbotAcum]):-
     chatbotGetElements(Chatbot,Id,_,_,_,_),
     chatbotIsNotDuplicated(Id,Resto),     %No hay duplicados
     chatbotsVerifier(Resto,ChatbotAcum).
-chatbotsVerifier([Cbot|Resto],ChatbotAcum):-
-    chatbotGetElements(Cbot,Id,_,_,_,_),
-    \+ chatbotIsNotDuplicated(Id,Resto),  %Encontrar duplicados
-    chatbotsVerifier(Resto,ChatbotAcum).
+% Este predicado permitiría filtrar flujos repetidos en caso de
+% construir un chatbot con flujos repetidos, asegurando la integridad
+% del chatbot
+%chatbotsVerifier([Cbot|Resto],ChatbotAcum):-
+%    chatbotGetElements(Cbot,Id,_,_,_,_),
+%    \+ chatbotIsNotDuplicated(Id,Resto),  %Encontrar duplicados
+%    chatbotsVerifier(Resto,ChatbotAcum).
 
 
-%Predicado
+%Predicado auxiliar que identifica duplicados
 % chatbotIsNotDuplicated(ChatbotId,Chatbots)
 %Dominio:
 %ChatbotId (int) X Chatbots (list of chatbots)
@@ -76,7 +86,8 @@ chatbotIsNotDuplicated(Id,[Cbot|Res]):-
     Id \= Id2,
     chatbotIsNotDuplicated(Id,Res).
 
-%Predicado selector
+%Predicado selector para obtener un chatbot específico en base a su ID
+%dentro de una lista de chatbots
 % getChatbotFromList(ChatbotId, Chatbots, Chatbot)
 % Dominio:
 % ChatbotId (int) , Chatbots (list of chatbots) , Chatbot (TDA chatbot)
@@ -88,7 +99,7 @@ getChatbotFromList(CbotId, [Cbot|_], Cbot):-
 getChatbotFromList(CbotId,[_|Chatbots],Cbot):-
     getChatbotFromList(CbotId,Chatbots,Cbot).
 
-%Predicado selector
+%Predicado selector general para todos los elementos del Chatbot
 % chatbotGetElements(ChatbotId,Name,WelcomeMessage,StartFlowId,Flows,Chatbot)
 %Dominio:
 %Chatbot (TDA chatbot) X ChatbotId(int) X Name (string) X WelcomeMessage (string) X

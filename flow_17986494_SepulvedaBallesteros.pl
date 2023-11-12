@@ -1,10 +1,12 @@
-
-%Clausulas de Horn
-%Base de conocimiento
+%TDA Flow
+%Representación: Lista
+%Id (int)
+%Message(string)
+%Options (list of Options)
 
 %Reglas
 
-%Predicado constructor
+%Predicado constructor de un nuevo chatbot
 % flow(Id, Name-msg, Oplist, Flow)
 %Dominio:
 % Id (int) X Name (string) X Oplist (list of options) X Flow (TDA flow)
@@ -16,7 +18,7 @@ flow(Id, Name, Oplist, Flow):-
     oplistVerifier(Oplist,RevOplist),
     Flow = [Id, Name, RevOplist].
 
-%Predicado modificador
+%Predicado modificador para añadir opciones
 % flowAddOption(Flow, Option, Flow)
 %Dominio: Flow (TDA flow) X Option (TDA option) X Flow (TDA flow)
 % Meta primaria: flowAddOption/3
@@ -26,12 +28,14 @@ flowAddOption(FlowIni, Option, FlowFin):-
     append(OplistIni,[Option], Oplist),
     oplistVerifier(Oplist,RevOplist),
     flow(E1, E2, RevOplist, FlowFin).
-flowAddOption(Flow, Option, Flow):-
-    flowGetElements(Flow, _, _, Oplist),
-    append(Oplist,[Option], Oplist2),
-    \+ oplistVerifier(Oplist2,_).
+% Esta clausula comentada permite manejar el caso de opciones duplicadas
+% devolviendo el flujo sin cambios en caso de agregar un duplicado.
+%flowAddOption(Flow, Option, Flow):-
+%    flowGetElements(Flow, _, _, Oplist),
+%    append(Oplist,[Option], Oplist2),
+%    \+ oplistVerifier(Oplist2,_).
 
-%Predicado de pertenencia
+%Predicado de verificación de duplicados
 % flowVerifier(Flowlist)
 %Dominio: Flowlist (list of flows) X Flowlist (list of flows)
 % Meta primaria: flowsVerifier/2
@@ -42,13 +46,16 @@ flowsVerifier([Flow|Resto],[Flow|FlowAcum]):-
     flowGetElements(Flow, Id, _, _),
     flowIsNotDuplicated(Id,Resto),
     flowsVerifier(Resto,FlowAcum).
-flowsVerifier([F|Resto],FlowAcum):-
-    flowGetElements(F, Id, _, _),
-    \+ flowIsNotDuplicated(Id,Resto),
-    flowsVerifier(Resto,FlowAcum).
+% El siguiente predicado permite manejar el caso de que la lista de
+% flujos inicialmente fuera creada con opciones repetidas, filtrando las
+% repeticiones asegurando la integridad del flujo
+%flowsVerifier([F|Resto],FlowAcum):-
+%    flowGetElements(F, Id, _, _),
+%    \+ flowIsNotDuplicated(Id,Resto),
+%    flowsVerifier(Resto,FlowAcum).
 
 
-%Predicado
+%Predicado auxiliar que identifica IDs repetidos en un listado de flows
 % flowIsNotDuplicated(Id,Flowlist)
 %Dominio: Id (int) X Flowlist (list of flows)
 % Meta primaria: flowIsNotDuplicated/2
@@ -59,10 +66,10 @@ flowIsNotDuplicated(Id,[Flow|Flowlist]):-
     Id \= E1,
     flowIsNotDuplicated(Id,Flowlist).
 
-%Predicado selector
+% Predicado selector específico: Identifica un flow dentro de una lista
+% a partir de su ID
 % getFlowFromList(FlowId, Flows, Flow)
-% Dominio:
-% Id (int) , Flows (list of flows) , Flow (TDA flow)
+% Dominio: Id (int) , Flows (list of flows) , Flow (TDA flow)
 % Meta primaria: getFlowFromList/3
 % Metas secundarias: flowGetElements/4, !/0
 getFlowFromList(Id, [Flow|_], Flow):-
@@ -71,7 +78,7 @@ getFlowFromList(Id, [Flow|_], Flow):-
 getFlowFromList(Id,[_|Flows],Flow):-
     getFlowFromList(Id,Flows,Flow).
 
-%Predicado selector
+%Predicado selector general
 % flowGetElements(Flow, Id, Name, Oplist)
 %Dominio:
 %Flow (TDA flow) X Id (int) X Name (string) X Oplist (list of options)

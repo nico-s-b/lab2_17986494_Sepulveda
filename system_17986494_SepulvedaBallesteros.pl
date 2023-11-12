@@ -1,3 +1,10 @@
+%TDA System
+%Representación: Lista
+%Name (string)
+%ChatbotCode (int)
+%Chatbots (list of chatbots)
+%Userlist (list of users)
+%User (string / integer)
 
 
 %Predicado constructor de un nuevo sistema
@@ -32,10 +39,13 @@ systemAddChatbot(SystemIni,Chatbot,SystemFin):-
     append(ChatbotsIni,[Chatbot],Chatbots),
     chatbotsVerifier(Chatbots,ChatbotsFin),
     system(E1,E2,ChatbotsFin,E4,E5,SystemFin).
-systemAddChatbot(System,Chatbot,System):-
-    systemGetElements(System,_,_,Chatbots,_,_),
-    append(Chatbots,[Chatbot],ChatbotsFin),
-    \+ chatbotsVerifier(ChatbotsFin,_).
+% Este predicado permite manejar el caso de agregar duplicados,
+% devolviendo el mismo sistema sin cambios en caso de intentar agregar
+% un chatbot con ID ya existente en el sistema
+%systemAddChatbot(System,Chatbot,System):-
+%    systemGetElements(System,_,_,Chatbots,_,_),
+%    append(Chatbots,[Chatbot],ChatbotsFin),
+%    \+ chatbotsVerifier(ChatbotsFin,_).
 
 %Predicado Modificador
 % Registra un nuevo usuario en el sistema creando un TDA user, evitando
@@ -51,7 +61,8 @@ systemAddUser(SystemIni,User,SystemFin):-
     user(User,UserF),
     append(UserlistIni,[UserF],Userlist),
     system(E1,E2,E3,Userlist,E5,SystemFin).
-systemAddUser(System,_,System).  %BORRAR ACA
+% Esta clausula permite manejar el caso de agregar un usuario ya existente
+%systemAddUser(System,_,System).
 
 % Predicado para que un usuario inicie sesión en el sistema. Evita
 % iniciar sesión si el usuario no está registrado o si ya hay una sesión
@@ -63,7 +74,10 @@ systemLogin(System,User,SystemLog):-
     systemGetElements(System,E1,E2,E3,Userlist,0),!,
     userInList(User,Userlist),
     system(E1,E2,E3,Userlist,User,SystemLog).
-systemLogin(System,_,System). %BORRAR ACA
+% Esta clausula permite manejar el caso de intentar iniciar sesión en
+% caso de que el usuario no esté en el sistema o que ya exista una
+% sesión iniciada.
+%systemLogin(System,_,System).
 
 %Predicado que finaliza la sesión de un usuario en el sistema
 % systemLogout(System,System)
@@ -71,9 +85,10 @@ systemLogin(System,_,System). %BORRAR ACA
 % Meta primaria: systemLogout/2
 % Metas secundarias: systemGetElements/6 , system/5
 systemLogout(System,SystemOut):-
-    systemGetElements(System,E1,E2,E3,Userlist,_),
-    system(E1,E2,E3,Userlist,0,SystemOut).       %Un 0 en la última posición de system marca que no hay sesión iniciada
-systemLogout(System,System).
+    systemGetElements(System,E1,_,E3,Userlist,_),
+    system(E1,0,E3,Userlist,0,SystemOut).       %Un 0 en la última posición de system marca que no hay sesión iniciada
+% Caso que permite manejar intento de logout cuando no hay una sesión iniciada
+%systemLogout(System,System).
 
 %Predicado systemTalkRec
 % systemTalkRec(System,Message,System)
@@ -81,11 +96,13 @@ systemLogout(System,System).
 % Meta primaria: system/3
 %Caso: no hay usuario logeado
 % Metas secundarias: \+/1 , systemGetElements/6
-% Si no hay usuario logeado no se puede interactuar con un chatbot
-systemTalkRec(System,_,System):-
-    systemGetElements(System,_,_,_,_,User),
-    \+ string(User).
-%Caso: mensaje NO es una opción válida
+% Si no hay usuario logeado no se puede interactuar con un chatbot. Este
+% predicado permitiría manejar la situación manteniendo el sistema.
+%systemTalkRec(System,_,System):-
+%    systemGetElements(System,_,_,_,_,User),
+%    \+ string(User).
+
+%Caso: mensaje NO es una opción válida.
 % Metas secundarias: systemGetElements/6 , userInList/3 , getChatbotFromList/3
 % chatbotGetElements/6 , getFlowFromList/3 , \+/2 , get_time/1 ,
 % format_time/3 , msgInOpionList/4 , =/2 , append/3 , user/3 ,
@@ -105,6 +122,7 @@ systemTalkRec(System, Msg, SystemT):-
     user(User,ChatHFin,UserF),                %Actualizar UserF
     updateUserChatH(UserF,UserlistIni,UserlistFin), %Actualizar Userlist
     system(E1,CbotCodeLink,Chatbots,UserlistFin,User,SystemT).
+
 %Caso: mensaje SI es una opción válida
 % Metas secundarias: systemGetElements/6 , userInList/3 , getChatbotFromList/3
 % chatbotGetElements/6 , getFlowFromList/3 , msgInOpionList/4 ,
@@ -210,14 +228,16 @@ formatChatH(User,Chatbots,[[Time,CbotId,FlowId,Msg]|ChatH],StrAcum,StrRes):-
 % Meta primaria: systemSimulate/4
 % Metas secundarias: number_string/2 , string_concat/3 , systemAddUser/3 ,
 % systemLogin/3 , interList/4 , simulating/3
+%Tras terminar simulación, devuelve el sistema sin sesión iniciada
 systemSimulate(System, 0, _, System).
 systemSimulate(SysIni, MaxInter, Seed, System):-
     number_string(Seed,StrSeed),
     string_concat("user",StrSeed,UserName),
-    systemAddUser(SysIni,UserName,SysUser),
-    systemLogin(SysUser,UserName,SysLog),
-    interList(MaxInter,Seed,[],List),
-    simulating(SysLog,List,System).
+    systemAddUser(SysIni,UserName,SysUser), %Registrar usuario simulado
+    systemLogin(SysUser,UserName,SysLog),   %Iniciar sesión de usuario simulado
+    interList(MaxInter,Seed,[],List),       %Generar lista aleatoria
+    simulating(SysLog,List,SysSimul),       %Generar simulación
+    systemLogout(SysSimul,System).          %Cerrar sesión tras la simulación
 
 % Predicados auxiliares a SystemSimulate
 % **************************************
@@ -226,16 +246,13 @@ systemSimulate(SysIni, MaxInter, Seed, System):-
 % Genera las simulaciones de forma recursiva para pasarlas a systemSimulate
 % Utiliza generateMens para obtener un mensaje para ejecutar systemTalkRec
 % simulating(System,List,System)
-% Dominio: System (TDA % system) X List (list) X System (TDA system)
+%Dominio: System (TDA % system) X List (list) X System (TDA system)
 % Meta primaria: simulating/3
 % Metas secundarias: generateMens/3 , systemTalkRec/3 , simulating/3
 simulating(System,[],System).
 simulating(SysIni,[Rand|Rest],SysFin):-
     generateMens(SysIni,Rand,Msg),
     systemTalkRec(SysIni,Msg,SysNext),
-    write("\n"),
-    write(Msg),
-    write("\n"),
     simulating(SysNext,Rest,SysFin).
 simulating(System,[_|Rest],System):-
     simulating(System,Rest,System).
@@ -262,9 +279,8 @@ generateMens(System,Rand,Msg):-
     NRand is Rand / 10,
     NRand > 10,
     generateMens(System,round(NRand),Msg).
-% En último caso, forzar mensaje, el cual provocará fallo en el
-% systemTalkRec deteniendo la simulación dando false.
-generateMens(_,_,"Fail message").
+% Forzar mensaje de error para detectar situaciones no deseadas
+generateMens(_,_,"IDK").
 
 
 %Predicado para generar, a partir de un número aleatorio, un mensaje en

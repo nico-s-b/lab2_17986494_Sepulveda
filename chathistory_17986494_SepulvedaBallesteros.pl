@@ -1,6 +1,11 @@
 %ChatHistory = null|list
+%Representación: Lista: [[Time,ChatbotCode,FlowCode,Message]|ChatH]
+%Time (string)
+%ChatbotCode (int)
+%FlowCode (int)
+%Message (string)
 
-%Predicado
+%Predicado verificador de un elemento de chatHistory
 % chatVerifier(ChatHistory)
 %Dominio: ChatHistory (list)
 % Meta primaria: chatVerifier
@@ -13,7 +18,7 @@ chatVerifier([[Time,Cblink,Flink,Msg]|Resto]):-
     integer(Flink),
     chatVerifier(Resto).
 
-%Predicado
+% Predicado que arma el string correspondiente a un mensaje o elemento de chat
 % chatToStr(User,Time,Message,ChatbotName,FlowMens,Options,FormatedStr)
 %Dominio: User (string) X Time (string) X ChatbotName (string) X
 %FlowMens (string) X Options (list of options) X FormatedStr (string)
@@ -26,7 +31,8 @@ chatToStr(User,Time,Msg,CbotName,FlowMens,Oplist,StrRes):-
     optionStringList(Oplist,"",OptionString),
     string_concat(Str11,OptionString,StrRes).
 
-%Predicado
+% Predicado que arma el string en forma de listado de opciones
+% asociadas a un flujo, a partir de una lista de opciones
 % optionStringList(Options, StrAcc, StrRes)
 %Dominio: Options (list of options) X StrAcc (string) X StrRes (string)
 % Meta primaria: optionStringList/3
