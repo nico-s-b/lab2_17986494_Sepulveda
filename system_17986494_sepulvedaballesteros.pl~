@@ -5,7 +5,6 @@
 %Chatbots (list of chatbots)
 %Userlist (list of users)
 %User (string / integer)
-%SysTime (string)
 
 
 %Predicado constructor de un nuevo sistema
@@ -19,35 +18,32 @@ system(Name, IniCbotCodeLink, Chatbots,System):-
     string(Name),
     integer(IniCbotCodeLink),
     chatbotsVerifier(Chatbots, RevChatbots),
-    get_time(T),
-    format_time(string(SysTime),'%FT%T%:z',T),
-    System = [Name, IniCbotCodeLink, RevChatbots,[],0,SysTime].
+    System = [Name, IniCbotCodeLink, RevChatbots,[],0].
 
 %Predicado especial para reconstruir sistemas ya creados.
-% system(Name,InitialChatbotCodeLink,Chatbots,Userlist,User,SysTime,System)
+% system(Name,InitialChatbotCodeLink,Chatbots,Userlist,User,System)
 %Dominio: Name (string) X InitialChatbotCodeLink (int) X Chatbots (list of
-%chatbots) X Userlist (list uf users) X User (string) X SysTime
-%(string) X System (TDA system)
-% Meta primaria: system/7
-system(N,ICCL,CB,Userlist,User,SysTime,System):-
-    System = [N,ICCL,CB,Userlist,User,SysTime].
+% chatbots) X Userlist (list uf users) X User (string) System (TDA system)
+% Meta primaria: system/6
+system(N,ICCL,CB,Userlist,User,System):-
+    System = [N,ICCL,CB,Userlist,User].
 
 %Predicado Modificador
 %Añade un nuevo chatbot al sistema. Verifica que no esté duplicado.
 % systemAddChatbot(System,Chatbot,System)
 %Dominio: System (TDA system) X Chatbot (TDA chatbot) X System (TDA system)
 % Meta primaria: systemAddChatbot/3
-% Metas secundarias: systemGetElements/7 , append/3 , chatbotsVerifier/2 , system/7
+% Metas secundarias: systemGetElements/6 , append/3 , chatbotsVerifier/2 , system/6
 systemAddChatbot(SystemIni,Chatbot,SystemFin):-
-    systemGetElements(SystemIni,E1,E2,ChatbotsIni,E4,E5,E6),
+    systemGetElements(SystemIni,E1,E2,ChatbotsIni,E4,E5),
     append(ChatbotsIni,[Chatbot],Chatbots),
     chatbotsVerifier(Chatbots,ChatbotsFin),
-    system(E1,E2,ChatbotsFin,E4,E5,E6,SystemFin).
+    system(E1,E2,ChatbotsFin,E4,E5,SystemFin).
 % Este predicado permite manejar el caso de agregar duplicados,
 % devolviendo el mismo sistema sin cambios en caso de intentar agregar
 % un chatbot con ID ya existente en el sistema
 %systemAddChatbot(System,Chatbot,System):-
-%    systemGetElements(System,_,_,Chatbots,_,_,_),
+%    systemGetElements(System,_,_,Chatbots,_,_),
 %    append(Chatbots,[Chatbot],ChatbotsFin),
 %    \+ chatbotsVerifier(ChatbotsFin,_).
 
@@ -57,14 +53,14 @@ systemAddChatbot(SystemIni,Chatbot,SystemFin):-
 % systemAddUser(System,User,System)
 %Dominio: System (TDA system) X User (string) X System (TDA system)
 % Meta primaria: systemAddUser/3
-% Metas secundarias: systemGetElements/7 , user/2 , append/3 , \+/1
-% userInList/2 , system/7
+% Metas secundarias: systemGetElements/5 , user/2 , append/3 , \+/1
+% userInList/2 , system/5
 systemAddUser(SystemIni,User,SystemFin):-
-    systemGetElements(SystemIni,E1,E2,E3,UserlistIni,E5,E6),
+    systemGetElements(SystemIni,E1,E2,E3,UserlistIni,E5),
     \+ userInList(User,UserlistIni),
     user(User,UserF),
     append(UserlistIni,[UserF],Userlist),
-    system(E1,E2,E3,Userlist,E5,E6,SystemFin).
+    system(E1,E2,E3,Userlist,E5,SystemFin).
 % Esta clausula permite manejar el caso de agregar un usuario ya existente
 %systemAddUser(System,_,System).
 
@@ -73,11 +69,11 @@ systemAddUser(SystemIni,User,SystemFin):-
 % systemLogin(System,User,System)
 %Dominio: System (TDA system) X User (string) X System (TDA system)
 % Meta primaria: systemLogin/3
-% Metas secundarias: systemGetElements/7 , !/0 , userInList/2 , system/7
+% Metas secundarias: systemGetElements/6 , !/0 , userInList/2
 systemLogin(System,User,SystemLog):-
-    systemGetElements(System,E1,E2,E3,Userlist,0,SysTime),!,
+    systemGetElements(System,E1,E2,E3,Userlist,0),!,
     userInList(User,Userlist),
-    system(E1,E2,E3,Userlist,User,SysTime,SystemLog).
+    system(E1,E2,E3,Userlist,User,SystemLog).
 % Esta clausula permite manejar el caso de intentar iniciar sesión en
 % caso de que el usuario no esté en el sistema o que ya exista una
 % sesión iniciada.
@@ -87,10 +83,10 @@ systemLogin(System,User,SystemLog):-
 % systemLogout(System,System)
 %Dominio: System (TDA system) X System (TDA system)
 % Meta primaria: systemLogout/2
-% Metas secundarias: systemGetElements/7 , system/7
+% Metas secundarias: systemGetElements/6 , system/5
 systemLogout(System,SystemOut):-
-    systemGetElements(System,E1,_,E3,Userlist,_,SysTime),
-    system(E1,0,E3,Userlist,0,SysTime,SystemOut).       %Un 0 en la última posición de system marca que no hay sesión iniciada
+    systemGetElements(System,E1,_,E3,Userlist,_),
+    system(E1,0,E3,Userlist,0,SystemOut).       %Un 0 en la última posición de system marca que no hay sesión iniciada
 % Caso que permite manejar intento de logout cuando no hay una sesión iniciada
 %systemLogout(System,System).
 
@@ -99,20 +95,20 @@ systemLogout(System,SystemOut):-
 %Dominio: System (TDA system) X Message (string) X System (TDA system)
 % Meta primaria: system/3
 %Caso: no hay usuario logeado
-% Metas secundarias: \+/1 , systemGetElements/7
+% Metas secundarias: \+/1 , systemGetElements/6
 % Si no hay usuario logeado no se puede interactuar con un chatbot. Este
 % predicado permitiría manejar la situación manteniendo el sistema.
 %systemTalkRec(System,_,System):-
-%    systemGetElements(System,_,_,_,_,User,_),
+%    systemGetElements(System,_,_,_,_,User),
 %    \+ string(User).
 
 %Caso: mensaje NO es una opción válida.
-% Metas secundarias: systemGetElements/7 , userInList/3 ,
-% getChatbotFromList/3 chatbotGetElements/6 , getFlowFromList/3 , \+/2 ,
-% get_time/1 , format_time/3 , msgInOpionList/4 , =/2 , append/3 ,
-% user/3 , updateUserChatH/3 , system/7
+% Metas secundarias: systemGetElements/6 , userInList/3 , getChatbotFromList/3
+% chatbotGetElements/6 , getFlowFromList/3 , \+/2 , get_time/1 ,
+% format_time/3 , msgInOpionList/4 , =/2 , append/3 , user/3 ,
+% updateUserChatH/3 , system/6
 systemTalkRec(System, Msg, SystemT):-
-    systemGetElements(System,E1,CbotCodeLink,Chatbots,UserlistIni,User,SysTime),
+    systemGetElements(System,E1,CbotCodeLink,Chatbots,UserlistIni,User),
     getChatbotFromList(CbotCodeLink,Chatbots,Chatbot),  %Encontrar Chatbot asociado
     chatbotGetElements(Chatbot,_,_,_,FlowCode,Flows),
     getFlowFromList(FlowCode,Flows,Flow),     %Encontrar Flow actual
@@ -125,15 +121,15 @@ systemTalkRec(System, Msg, SystemT):-
     append(ChatHIni,[Chat],ChatHFin),           %Agregar elemento de Chat a ChatHistory
     user(User,ChatHFin,UserF),                %Actualizar UserF
     updateUserChatH(UserF,UserlistIni,UserlistFin), %Actualizar Userlist
-    system(E1,CbotCodeLink,Chatbots,UserlistFin,User,SysTime,SystemT).
+    system(E1,CbotCodeLink,Chatbots,UserlistFin,User,SystemT).
 
 %Caso: mensaje SI es una opción válida
-% Metas secundarias: systemGetElements/7 , userInList/3 ,
-% getChatbotFromList/3 chatbotGetElements/6 , getFlowFromList/3 ,
-% msgInOpionList/4 , get_time/1 , format_time/3 , =/2 append/3 , user/3 ,
-% updateUserChatH/3 , updateChatbotFlowCode/4 , system/7
+% Metas secundarias: systemGetElements/6 , userInList/3 , getChatbotFromList/3
+% chatbotGetElements/6 , getFlowFromList/3 , msgInOpionList/4 ,
+% get_time/1 , format_time/3 , =/2 append/3 , user/3 , updateUserChatH/3 ,
+% updateChatbotFlowCode/4 , system/6
 systemTalkRec(System,Msg,SystemT):-
-    systemGetElements(System,E1,CbotCodeLinkIni,Chatbots,UserlistIni,User,SysTime),
+    systemGetElements(System,E1,CbotCodeLinkIni,Chatbots,UserlistIni,User),
     getChatbotFromList(CbotCodeLinkIni,Chatbots,Chatbot),  %Encontrar Chatbot asociado
     chatbotGetElements(Chatbot,_,_,_,FlowId,Flows),
     getFlowFromList(FlowId,Flows,Flow),     %Encontrar Flow actual
@@ -147,7 +143,7 @@ systemTalkRec(System,Msg,SystemT):-
     user(User,ChatHFin,UserF),                %Actualizar UserF
     updateUserChatH(UserF,UserlistIni,UserlistFin), %Actualizar Userlist
     updateChatbotFlowCode(NewCbotCodeLink,NewFlowId,Chatbots,ChatbotsFin),
-    system(E1,NewCbotCodeLink,ChatbotsFin,UserlistFin,User,SysTime,SystemT).
+    system(E1,NewCbotCodeLink,ChatbotsFin,UserlistFin,User,SystemT).
 
 % Predicados auxiliares a SystemTalkRec
 % **************************************
@@ -196,11 +192,11 @@ replaceChatbot(CbCode,ChatbotFin,[Chatbot2|Chatbots],[Chatbot2|ChatbotsAcum]):-
 % systemSyhthesis(System,User,Str)
 %Dominio: System (TDA system) X  User (string) X Str (string)
 % Meta primaria: systemSynthesis/3
-% Metas secundarias: systemGetElements/7 , getUserChatH/3 , formatChatH/5
+% Metas secundarias: systemGetElements/6 , getUserChatH/3 , formatChatH/5
 systemSynthesis(System, User, Str):-
-    systemGetElements(System, _, _, Chatbots, Userlist, _, SysTime),
+    systemGetElements(System, _, _, Chatbots, Userlist, _),
     getUserChatH(User,Userlist,ChatH),
-    formatChatH(User, SysTime, Chatbots, ChatH,"", Str).
+    formatChatH(User, Chatbots, ChatH,"", Str).
 
 %Predicado formatChatH
 % Construye recursivamente el string de síntesis a partir de los string
@@ -211,16 +207,16 @@ systemSynthesis(System, User, Str):-
 % Meta primaria: formatChatH/5
 % Metas secundarias: getChatbotFromList/3 , chatbotGetElements/6 ,
 % getFlowFromList/3 , flowGetElements/4 , chatToStr/7 , string_concat/3 , formatChatH/5
-formatChatH(_, _, _,[],StrRes,StrRes).
-formatChatH(User, SysTime,Chatbots,[[Time,CbotId,FlowId,Msg]|ChatH],StrAcum,StrRes):-
+formatChatH(_,_,[],StrRes,StrRes).
+formatChatH(User,Chatbots,[[Time,CbotId,FlowId,Msg]|ChatH],StrAcum,StrRes):-
     getChatbotFromList(CbotId,Chatbots,Chatbot),
     chatbotGetElements(Chatbot,_,CbotName,_,_,Flows),
     getFlowFromList(FlowId,Flows,Flow),
     flowGetElements(Flow,_,FlowMens,Oplist),
-    chatToStr(User,Time,SysTime,Msg,CbotName,FlowMens,Oplist,ChatStr),
+    chatToStr(User,Time,Msg,CbotName,FlowMens,Oplist,ChatStr),
     string_concat(StrAcum,ChatStr,StrTemp),
     string_concat(StrTemp,"\n",StrAcumNew),
-    formatChatH(User,SysTime,Chatbots,ChatH,StrAcumNew,StrRes).
+    formatChatH(User,Chatbots,ChatH,StrAcumNew,StrRes).
 
 
 %Predicado systemSimulate
@@ -318,9 +314,8 @@ interList(MaxInter,Seed,Resto,Lista):-
     interList(NextInter, Rand,[Rand|Resto],Lista).
 
 %Predicado selector
-% systemGetElements(System,Name,InitialChatbotCodeLink,Chatbots,Userlist,User,SysTime)
+% systemGetElements(System,Name,InitialChatbotCodeLink,Chatbots,Userlist,User)
+% Meta primaria: systemGetElemets/6
 %Dominio: System (TDA system) X Name (string) X InitialChatbotCodeLink (int) X
 % Chatbots (list of chatbots) X Userlist (list of user) X User (string)
-% X SysTime (string)
-% Meta primaria: systemGetElemets/7
-systemGetElements([E1,E2,E3,E4,E5,E6],E1,E2,E3,E4,E5,E6).
+systemGetElements([E1,E2,E3,E4,E5],E1,E2,E3,E4,E5).
