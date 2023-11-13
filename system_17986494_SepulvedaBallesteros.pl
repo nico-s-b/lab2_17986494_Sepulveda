@@ -271,7 +271,7 @@ simulating(System,[_|Rest],System):-
 % chatbotGetElements/6 , getFlowFromList/3 , flowGetElements/4
 % randMens/2 , msgInOptionList/4
 generateMens(System,Rand,Msg):-
-    systemGetElements(System,_,CbotCode,Chatbots,_,_),
+    systemGetElements(System,_,CbotCode,Chatbots,_,_,_),
     getChatbotFromList(CbotCode,Chatbots,Chatbot),  %Encontrar Chatbot asociado
     chatbotGetElements(Chatbot,_,_,_,FlowId,Flows),
     getFlowFromList(FlowId,Flows,Flow),     %Encontrar Flow actual
